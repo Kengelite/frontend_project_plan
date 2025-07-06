@@ -17,12 +17,12 @@ export default function DatatableActivityDetail({
   id_activityref,
   val,
   onEditTotal,
-  Balance
+  Balance,
 }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [SecrchData, setSecrchData] = useState([]);
-  const { id_strategic, id_actionplan, id_project ,id_activity,total} = val;
+  const { id_strategic, id_actionplan, id_project, id_activity, total } = val;
   const [SearchTerm, setSearchTerm] = useState("");
   const [totalRows, setTotalRows] = useState(0);
   const [page, setPage] = useState(1);
@@ -80,6 +80,7 @@ export default function DatatableActivityDetail({
     setSecrchData(filtered);
   }, [SearchTerm, data]);
 
+  const isDeleted = (row) => row.deleted_at !== null;
   const columns = [
     {
       name: "รหัส",
@@ -89,11 +90,21 @@ export default function DatatableActivityDetail({
     },
     {
       name: "ชื่อ",
-      selector: (row) => (row.detail ? row.detail : "-"),
+      selector: (row) => row.detail || "-",
       sortable: true,
       wrap: true,
       width: "250px",
-      cell: (row) => <div style={{ padding: "10px 0px" }}>{row.detail}</div>,
+      cell: (row) => (
+        <div
+          style={{
+            padding: "10px 0px",
+            color: isDeleted(row) ? "red" : undefined,
+            textDecoration: isDeleted(row) ? "line-through" : undefined,
+          }}
+        >
+          {row.detail}
+        </div>
+      ),
     },
     {
       name: "วันที่ดำเนินงาน ( ว/ด/ป )",
@@ -110,7 +121,17 @@ export default function DatatableActivityDetail({
           (date.getMonth() + 1).toString().padStart(2, "0") +
           "/" +
           date.getFullYear();
-        return formatted;
+
+        return (
+          <div
+            style={{
+              color: isDeleted(row) ? "red" : undefined,
+              textDecoration: isDeleted(row) ? "line-through" : undefined,
+            }}
+          >
+            {formatted}
+          </div>
+        );
       },
     },
     {
@@ -128,7 +149,17 @@ export default function DatatableActivityDetail({
           (date.getMonth() + 1).toString().padStart(2, "0") +
           "/" +
           date.getFullYear();
-        return formatted;
+
+        return (
+          <div
+            style={{
+              color: isDeleted(row) ? "red" : undefined,
+              textDecoration: isDeleted(row) ? "line-through" : undefined,
+            }}
+          >
+            {formatted}
+          </div>
+        );
       },
     },
     {
@@ -138,11 +169,19 @@ export default function DatatableActivityDetail({
       wrap: true,
       right: "true",
       width: "160px",
-      cell: (row) =>
-        `${Number(row.price).toLocaleString("th-TH", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })} `,
+      cell: (row) => (
+        <div
+          style={{
+            color: isDeleted(row) ? "red" : undefined,
+            textDecoration: isDeleted(row) ? "line-through" : undefined,
+          }}
+        >
+          {`${Number(row.price).toLocaleString("th-TH", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`}
+        </div>
+      ),
     },
     {
       name: "สถานที่",
@@ -151,75 +190,108 @@ export default function DatatableActivityDetail({
       sortable: true,
       width: "200px",
       cell: (row) => (
-        <div className="flex items-center h-full">{row.station}</div>
+        <div
+          className="flex items-center h-full"
+          style={{
+            color: isDeleted(row) ? "red" : undefined,
+            textDecoration: isDeleted(row) ? "line-through" : undefined,
+          }}
+        >
+          {row.station}
+        </div>
       ),
     },
     {
-      name: "ไฟล์",
+      name: " Link ข้อมูล ",
       ignoreRowClick: true,
+      center : "true",
       cell: (row) =>
-        row.report_data !== "-" || row.report_data ? (
+        row.deleted_at == null ? (
           <a
             className="flex items-center gap-2 btn btn-sm btn-outline-primary hover:text-blue-500 rounded hover:bg-gray-100 p-2"
             href={row.report_data}
             target="_blank"
             rel="noopener noreferrer"
           >
-            <HiOutlineDocumentReport className="text-lg " />
-            ไฟล์
+            <HiOutlineDocumentReport className="text-2xl" />
+            
           </a>
         ) : (
-          "-"
+          <div className="text-red-500">
+            {" "}
+             - 
+          </div>
         ),
     },
-
+    {
+      name: "ผู้ลบ",
+      selector: (row) => row.name || "-",
+      sortable: true,
+      wrap: true,
+      width: "150px",
+      cell: (row) => (
+        <div
+          style={{
+            padding: "10px 0px",
+            color: isDeleted(row) ? "red" : undefined,
+            // textDecoration: isDeleted(row) ? "line-through" : undefined,
+          }}
+        >
+          {row.name}
+        </div>
+      ),
+    },
     {
       name: "ดำเนินการ",
-      cell: (row,index) => (
-        <>
-          <div style={{ padding: "5px" }}>
-            <button
-              className="rounded border-gray-200 p-2 hover:bg-gray-100 group"
-              onClick={() => {
-                // เก็บข้อมูลที่ต้องส่งไว้ใน sessionStorage
-                sessionStorage.setItem(
-                  "strategic_data",
-                  JSON.stringify({
-                    name: row.strategic_name,
-                    budget: row.budget,
-                  })
-                );
+      cell: (row, index) => {
+        if (row.deleted_at) return null; // ถ้าถูกลบ ไม่แสดงปุ่ม
 
-                sessionStorage.setItem(
-                  "activity_data_edit",
-                  JSON.stringify({
-                    id: row.activity_detail_id,
-                    detail: row.detail,
-                    station: row.station,
-                    total_price: row.price,
-                    start_date: row.start_date,
-                    end_date: row.end_date,
-                    report_data: row.report_data,
-                  })
-                );
+        return (
+          <>
+            <div style={{ padding: "5px" }}>
+              <button
+                className="rounded border-gray-200 p-2 hover:bg-gray-100 group"
+                onClick={() => {
+                  sessionStorage.setItem(
+                    "strategic_data",
+                    JSON.stringify({
+                      name: row.strategic_name,
+                      budget: row.budget,
+                    })
+                  );
 
-                // เปลี่ยนหน้า
-                window.location.href = `./${id_activity}/edit?total=${index+1}&maxBudget=${Balance}`;     }}
-            >
-              <FiEdit2 className="text-xl text-gray-500 group-hover:text-black" />
-            </button>
-          </div>
-          <div style={{ padding: "5px" }}>
-            {" "}
-            <button
-              className="rounded border-gray-200 p-2 hover:bg-gray-100 hover:text-red-500 "
-              onClick={() => handleDelete(row)} // เรียกใช้ฟังก์ชัน handleDelete เมื่อกดปุ่ม
-            >
-              <i className="bi bi-trash text-xl "></i>
-            </button>
-          </div>
-        </>
-      ),
+                  sessionStorage.setItem(
+                    "activity_data_edit",
+                    JSON.stringify({
+                      id: row.activity_detail_id,
+                      detail: row.detail,
+                      station: row.station,
+                      total_price: row.price,
+                      start_date: row.start_date,
+                      end_date: row.end_date,
+                      report_data: row.report_data,
+                    })
+                  );
+
+                  window.location.href = `./${id_activity}/edit?total=${
+                    index + 1
+                  }&maxBudget=${Balance}`;
+                }}
+              >
+                <FiEdit2 className="text-xl text-gray-500 group-hover:text-black" />
+              </button>
+            </div>
+            <div style={{ padding: "5px" }}>
+              <button
+                className="rounded border-gray-200 p-2 hover:bg-gray-100 hover:text-red-500"
+                onClick={() => handleDelete(row)}
+              >
+                <i className="bi bi-trash text-xl" />
+              </button>
+            </div>
+          </>
+        );
+      },
       ignoreRowClick: true,
     },
   ];
@@ -438,7 +510,7 @@ export default function DatatableActivityDetail({
             className="bg-white rounded-md border
       border-gray-200 shadow-xl mt-3 
       "
-            style={{ height: "90vh", display: "flex", flexDirection: "column" }}
+            style={{ display: "flex", flexDirection: "column" }}
           >
             <DataTable
               columns={columns}

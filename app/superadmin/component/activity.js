@@ -17,6 +17,7 @@ import { MdEmail } from "react-icons/md";
 export default function DatatableActivity({
   id_projectref,
   val,
+  onMaxBudgetChange,
   onTotalChange,
 }) {
   const [data, setData] = useState([]);
@@ -47,6 +48,13 @@ export default function DatatableActivity({
       if (onTotalChange) {
         onTotalChange(res.total);
       }
+
+      const totalBudget = res.data.reduce(
+        (sum, item) => sum + parseFloat(item.budget),
+        0
+      );
+      console.log(totalBudget);
+      onMaxBudgetChange(totalBudget);
 
       // console.log(res);
     } catch (err) {
@@ -188,6 +196,16 @@ export default function DatatableActivity({
           </span>
         );
       },
+    },
+    {
+      name: "จำนวนการแจ้งเตือน",
+      selector: (row) => row.count_send_email,
+      sortable: true,
+      center: "true",
+      width: "200px",
+      cell: (row) => (
+        <div className="flex items-center h-full">{row.count_send_email}</div>
+      ),
     },
     {
       name: "แจ้งเตือน",
@@ -380,16 +398,19 @@ export default function DatatableActivity({
   };
 
   const handleNotiEmail = async (row) => {
-    console.log("test :::: ")
+    console.log("test :::: ");
     const result = await Swal.fire({
-      title: "คุณแน่ใจหรือไม่ ?",
+      title: "คุณแน่ใจหรือไม่?",
       text: `คุณต้องการแจ้งเตือนสำหรับ "${row.name_activity}" หรือไม่`,
-      icon: "warning",
+      icon: "question",
+      showDenyButton: true,
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "gray",
-      confirmButtonText: "ยืนยัน",
+      confirmButtonText: "ความคืบหน้ากิจกรรม", // ปุ่มหลัก
+      denyButtonText: "รายงานผลกิจกรรม", // ปุ่มรอง
       cancelButtonText: "ยกเลิก",
+      confirmButtonColor: "#3085d6",
+      denyButtonColor: "#28a745",
+      cancelButtonColor: "gray",
     });
 
     if (result.isConfirmed) {
@@ -403,7 +424,7 @@ export default function DatatableActivity({
           },
         });
         const token = Cookies.get("token");
-        const response = await SendEmailActivity(token,row.activity_id);
+        const response = await SendEmailActivity(token, row.activity_id, 1);
         // if(response)
         console.log(response);
         if (response.status === 200) {
@@ -417,7 +438,45 @@ export default function DatatableActivity({
       } catch (err) {
         Swal.fire({
           title: "เกิดข้อผิดพลาด",
-          text: "ไม่สามารถเปลี่ยนสถานะได้ กรุณาลองใหม่อีกครั้ง",
+          text: "ไม่สามารถส่ง E-mail แจ้งเตือนได้ กรุณาลองใหม่อีกครั้ง",
+          icon: "error",
+          confirmButtonText: "ตกลง",
+        });
+        console.log(err);
+      }
+    } else if (result.isDenied) {
+      try {
+        Swal.fire({
+          title: "กำลังอัปเดตข้อมูล...",
+          text: "กรุณารอสักครู่",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading(); // แสดง loading spinner
+          },
+        });
+        const token = Cookies.get("token");
+        const response = await SendEmailActivity(token, row.activity_id, 2);
+        // if(response)
+        console.log(response);
+        if (response.status === 200) {
+          setSecrchData((prev) =>
+            prev.map((e) =>
+              e.activity_id === row.activity_id
+                ? { ...e, count_send_email: (e.count_send_email ?? 0) + 1 }
+                : e
+            )
+          );
+          Swal.fire({
+            title: "ส่งการแจ้งเตือนสำเร็จ",
+            text: "ข้อมูลถูกส่งการแจ้งเตือนสำเร็จแล้ว",
+            icon: "success",
+            confirmButtonText: "ตกลง",
+          });
+        }
+      } catch (err) {
+        Swal.fire({
+          title: "เกิดข้อผิดพลาด",
+          text: "ไม่สามารถส่ง E-mail แจ้งเตือนได้ กรุณาลองใหม่อีกครั้ง",
           icon: "error",
           confirmButtonText: "ตกลง",
         });
@@ -505,7 +564,7 @@ export default function DatatableActivity({
           </div>
           <div
             className="bg-white shadow-xl rounded-md border border-gray-200 mt-4 flex flex-col"
-            style={{ height: "90vh" }}
+           
           >
             <DataTable
               columns={columns}

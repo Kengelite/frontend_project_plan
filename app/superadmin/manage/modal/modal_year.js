@@ -4,12 +4,13 @@ import Swal from "sweetalert2";
 import {
   AddDataYear,
   EditDatadeYear,
-} from "../../../fetch_api/fetch_api_admin";
+} from "../../../fetch_api/fetch_api_superadmin";
 import Cookies from "js-cookie";
 export function ModalAddYear({ isOpen, onClose, type, data }) {
   if (!isOpen) return null;
 
   const [Year, setYear] = useState(data.name);
+  const [Yearbudget, setYearbudget] = useState(data.budget);
   const [OlYear, setolddpartmentName] = useState(data.name);
 
   const handleSubmit = async (e) => {
@@ -44,10 +45,10 @@ export function ModalAddYear({ isOpen, onClose, type, data }) {
 
           let response;
           if (type == 1) {
-            response = await AddDataYear(token, Year);
+            response = await AddDataYear(token, Year,Yearbudget);
           } else {
             // console.log(data.id)
-            response = await EditDatadeYear(token, Year, data.id);
+            response = await EditDatadeYear(token, Year, data.id,Yearbudget);
           }
 
           // if(response)
@@ -85,6 +86,29 @@ export function ModalAddYear({ isOpen, onClose, type, data }) {
       }
     });
   };
+
+  function formatDecimalWithComma(value) {
+    if (value === "" || value === null || value === undefined) return "";
+
+    // const [intPart, decimalPart] = value.split(".");
+    // \B = ยุทธ์ศาสตร์ที่ไม่ใช่ขอบเขตคำ
+    // ?= ตรงนี้จะ match ก็ต่อเมื่อข้างหน้ามี pattern ที่กำหนด
+    // \d{3} → ตัวเลข 3 ตัวติดกัน
+    // (?!\d) ป้องกันการใส่คอมมาที่ท้ายสุดของตัวเลข เช่น "123," ← แบบนี้ไม่เอา
+    // มองไปข้างหน้า ถ้าเจอกลุ่มตัวเลข 3 หลักขึ้นไป ที่ ไม่มีตัวเลขต่อท้ายอีก ให้ match ตรงนี้
+
+    const strValue = String(value);
+
+    // ถ้าไม่มีจุดทศนิยม ไม่ต้องแยก
+    if (!strValue.includes(".")) {
+      return strValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    const [intPart, decimalPart] = strValue.split(".");
+    const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return decimalPart !== undefined
+      ? `${formattedInt}.${decimalPart}`
+      : formattedInt;
+  }
   return (
     <div
       id="popup-modal"
@@ -145,6 +169,39 @@ export function ModalAddYear({ isOpen, onClose, type, data }) {
                   onChange={(e) => {
                     // onYearChange(e.target.value);
                     setYear(e.target.value);
+                  }}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="nameStrategic"
+                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  งบประมาณ
+                </label>
+                <input
+                  type="text"
+                  name="nameStrategic"
+                  id="nameStrategic"
+                  className="bg-gray-0 border  border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="กรุณากรอกงบประมาณ"
+                  required
+                  value={formatDecimalWithComma(Yearbudget) ?? ""}
+                  // value={Yearbudget}
+                  // onChange={(e) => {
+                  //   // onYearChange(e.target.value);
+                  //   setYearbudget(e.target.value);
+                  // }}
+
+                  onChange={(e) => {
+                    const input = e.target.value.replace(/,/g, "");
+
+                    if (/^\d*(\.?\d{0,2})?$/.test(input)) {
+                      // ตรวจงบเกินจากค่าที่ parse เป็น float
+                      const floatVal = parseFloat(input || "0");
+
+                      setYearbudget(input);
+                    }
                   }}
                 />
               </div>

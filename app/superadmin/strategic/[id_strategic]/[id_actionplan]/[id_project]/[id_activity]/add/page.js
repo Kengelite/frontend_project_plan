@@ -8,7 +8,7 @@ import Cookies from "js-cookie";
 import Swal from "sweetalert2";
 import _ from "lodash";
 import { useSearchParams } from "next/navigation";
-import { AddDataActivitydetail } from "../../../../../../../fetch_api/fetch_api_admin";
+import { AddDataActivitydetail } from "../../../../../../../fetch_api/fetch_api_superadmin";
 export default function addActivtydetail({ params }) {
   const [loading, setLoading] = useState(true);
   const [id_employee, setIdemployee] = useState(null);
@@ -280,7 +280,7 @@ export default function addActivtydetail({ params }) {
                 );
               })
               .then(() => {
-                window.location.href = `/admin/strategic/${id_strategic}/${id_actionplan}/${id_project}/${id_activity}`;
+                window.history.back();
               });
           } else {
             Swal.fire({
@@ -306,14 +306,22 @@ export default function addActivtydetail({ params }) {
   };
 
   function formatDecimalWithComma(value) {
-    if (value === "") return "";
+    if (value === "" || value === null || value === undefined) return "";
 
-    const [intPart, decimalPart] = value.split(".");
+    // const [intPart, decimalPart] = value.split(".");
     // \B = ยุทธ์ศาสตร์ที่ไม่ใช่ขอบเขตคำ
     // ?= ตรงนี้จะ match ก็ต่อเมื่อข้างหน้ามี pattern ที่กำหนด
     // \d{3} → ตัวเลข 3 ตัวติดกัน
     // (?!\d) ป้องกันการใส่คอมมาที่ท้ายสุดของตัวเลข เช่น "123," ← แบบนี้ไม่เอา
     // มองไปข้างหน้า ถ้าเจอกลุ่มตัวเลข 3 หลักขึ้นไป ที่ ไม่มีตัวเลขต่อท้ายอีก ให้ match ตรงนี้
+
+    const strValue = String(value);
+
+    // ถ้าไม่มีจุดทศนิยม ไม่ต้องแยก
+    if (!strValue.includes(".")) {
+      return strValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    const [intPart, decimalPart] = strValue.split(".");
     const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     return decimalPart !== undefined
       ? `${formattedInt}.${decimalPart}`
@@ -335,15 +343,16 @@ export default function addActivtydetail({ params }) {
             <div className="bg-gray-100  xl:col-span-2 hidden md:block md:col-span-3 pt-4 ps-3">
               <Menu />
             </div>
-            <div className="col-span-12 xl:col-span-10  md:col-span-9 mt-5 ms-4 md:mt-3 me-4 md:me-6">
-              <div className="flex flex-row items-center justify-between">
+            <div className="col-span-12 xl:col-span-10  md:col-span-9 mt-5 ms-4 md:mt-3 me-4 md:me-6 border border-gray-300 rounded-lg shadow-xl">
+              <div className="flex flex-row items-center justify-between py-4 px-8">
                 <div className="text-lg md:text-xl xl:text-2xl">
                   รายงานผลการดำเนินงานโครงการกิจกรรมตามแผนปฏิบัติการประจำปีงบประมาณ
                   พ.ศ. 2568
                 </div>
               </div>
+               <hr className="w-full border-gray-300" />
               <form className="space-y-4" onSubmit={handleSubmit}>
-                <div className="grid grid-cols-8 gap-x-8 gap-y-6 mt-3">
+                <div className="grid grid-cols-8 gap-x-8 gap-y-6 mt-3 py-4 px-8">
                   <div className="col-span-8 md:col-span-4">
                     <span className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                       ภายใต้โครงการ
@@ -555,32 +564,26 @@ export default function addActivtydetail({ params }) {
                       placeholder="กรุณากรอกจำนวนเงิน"
                       required
                       value={
-                        dataAddsend.total_price
-                          ? formatDecimalWithComma(dataAddsend.total_price)
-                          : ""
+                        formatDecimalWithComma(dataAddsend.total_price) ?? ""
                       }
                       onChange={(e) => {
-                        // /g คือ global flag (แทนที่ทุกตัวที่ตรง ไม่ใช่แค่ตัวแรก)
-                        const raw = e.target.value.replace(/,/g, ""); // เอา , ออกก่อน
-                        // (\.\d{0,2})? → จุดและตัวเลขหลังจุดไม่เกิน 2 ตัว
-                        // ? → ไม่ใส่จุดก็ได้
-                        if (/^\d*(\.\d{0,2})?$/.test(raw)) {
-                          const rawValue = parseFloat(raw || "0");
-                          // console.log(maxBudget);
-                          // ✅ ตรวจว่าไม่เกิน maxBudget
-                          const maxBalace = parseFloat(maxBudget);
-                          if (rawValue > maxBalace) {
-                            setOverBudget(true); // ⚠️ เกิน
-                          } else {
-                            setOverBudget(false); // ✅ ปกติ
+                        const input = e.target.value.replace(/,/g, "");
+
+                        if (/^\d*(\.?\d{0,2})?$/.test(input)) {
+                          // ตรวจงบเกินจากค่าที่ parse เป็น float
+                          const floatVal = parseFloat(input || "0");
+                          const max = parseFloat(maxBudget);
+                          if (floatVal > max) {
+                            setOverBudget(true);
+                            return;
                           }
 
-                          if (rawValue <= maxBalace) {
-                            setdataAddsend((prev) => ({
-                              ...prev,
-                              total_price: rawValue,
-                            }));
-                          }
+                          setOverBudget(false);
+
+                          setdataAddsend((prev) => ({
+                            ...prev,
+                            total_price: input,
+                          }));
                         }
                       }}
                       onBlur={() =>

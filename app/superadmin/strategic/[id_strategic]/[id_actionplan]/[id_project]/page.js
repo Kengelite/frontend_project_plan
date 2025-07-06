@@ -7,7 +7,7 @@ import Header from "../../../../component/header";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { ModalAddActivity } from "../../../component/modal_activity";
-
+import Swal from "sweetalert2";
 import {
   LayoutDashboard,
   BookOpen,
@@ -23,17 +23,35 @@ export default function HomeActivity({ params }) {
   const searchParams = useSearchParams();
   const [isOpenModalAdd, setIsOpenModalAdd] = useState(false);
   const [Activity, setActivity] = useState({ id: "", name: "", budget: "" });
+  const [Strategic, setStrategic] = useState({ id: "", name: "", budget: "" });
   const [open, setOpen] = useState(false);
   const { id_strategic, id_actionplan, id_project } = use(params);
   const [totalRows, setTotalRows] = useState(0);
+  const [MaxBudget, setMaxBudget] = useState(0);
   const toggleModalAdd = () => {
     setIsOpenModalAdd(!isOpenModalAdd); // เปลี่ยนสถานะของ modal
   };
 
   const handleModalSelect = (type) => {
+    // console.log(MaxBudget)
     if (type === "new") {
-      toggleModalAdd();
-      router.push(`./${id_project}/addnewactivity`);
+      if (Activity.budget - MaxBudget <= 0) {
+        toggleModalAdd();
+        Swal.fire({
+          title: "เกิดข้อผิดพลาด",
+          text: "เนื่องจากงบประมาณไม่เพียง จึงไม่สามารถเพิ่มกิจกรรมใหม่ได้",
+          icon: "error",
+          confirmButtonText: "ตกลง",
+        });
+        return;
+      } else {
+        toggleModalAdd();
+        router.push(
+          `./${id_project}/addnewactivity?total=${
+            totalRows + 1
+          }&maxbudget=${parseFloat(Activity.budget - MaxBudget)}`
+        );
+      }
     }
   };
 
@@ -58,13 +76,16 @@ export default function HomeActivity({ params }) {
 
   useEffect(() => {
     const data = sessionStorage.getItem("project_data");
+    const data_strategic = sessionStorage.getItem("strategic_data");
     // console.log(data)
-    if (!data) {
-      window.location.href = `/admin/strategic`;
+    if (!data || !data_strategic) {
+      window.location.href = `/superadmin/strategic`;
     }
     console.log(data);
+    console.log(data_strategic);
     if (data) {
       setActivity(JSON.parse(data));
+      setStrategic(JSON.parse(data_strategic));
     }
   }, []);
 
@@ -83,7 +104,7 @@ export default function HomeActivity({ params }) {
                 <ol className="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
                   <li className="inline-flex items-center">
                     <a
-                      href="/admin/strategic"
+                      href="/superadmin/strategic"
                       className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white"
                     >
                       <svg
@@ -116,7 +137,7 @@ export default function HomeActivity({ params }) {
                         />
                       </svg>
                       <a
-                        href={`/admin/strategic/${id_strategic}`}
+                        href={`/superadmin/strategic/${id_strategic}`}
                         className="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white"
                       >
                         {id_strategic}
@@ -141,7 +162,7 @@ export default function HomeActivity({ params }) {
                         />
                       </svg>
                       <a
-                        href={`/admin/strategic/${id_strategic}/${id_actionplan}`}
+                        href={`/superadmin/strategic/${id_strategic}/${id_actionplan}`}
                         className="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white"
                       >
                         {id_actionplan}
@@ -201,14 +222,14 @@ export default function HomeActivity({ params }) {
                   บาท
                 </div>
                 <div className="flex gap-4">
-                  <button
+                  {/* <button
                     data-modal-target="popup-modal"
                     data-modal-toggle="popup-modal"
                     onClick={toggleModalAdd}
                     className="w-22 justify-end md:w-25 py-1.5 bg-orange-500 text-white rounded-lg hover:bg-blue-700"
                   >
                     แจ้งเตือน
-                  </button>
+                  </button> */}
                   <button
                     data-modal-target="popup-modal"
                     data-modal-toggle="popup-modal"
@@ -221,11 +242,14 @@ export default function HomeActivity({ params }) {
               </div>
             </div>
             <div>
-              {Activity.id && (
+              {Activity.id && Strategic.id && (
                 <DatatableActivity
                   id_projectref={Activity.id}
                   onTotalChange={setTotalRows}
                   val={{ id_strategic, id_actionplan, id_project }}
+                  strategicName={Strategic.name}
+                  onMaxBudgetChange={setMaxBudget}
+                  actionplanName={Activity.name}
                 />
               )}
             </div>

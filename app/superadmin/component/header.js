@@ -18,6 +18,7 @@ export default function Header() {
     setFullname(fullname);
     const img = Cookies.get("urlImg");
     setImgprofile(img);
+    console.log(img)
   }, []);
   return (
     <>
@@ -34,7 +35,7 @@ export default function Header() {
           <div className="flex flex-row items-center">
             <div className="flex flex-row items-center gap-4">
               <img
-                src={Imgprofile || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"}
+                src={`${process.env.NEXT_PUBLIC_APP_API_URL}/uploads/user/${Imgprofile}` || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"}
                 alt="profile"
                 className="w-12 h-12 rounded-full object-cover hidden md:block "
               />

@@ -21,7 +21,8 @@ import DatatableProject from "../../../component/project";
 export default function HomeProject({ params }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [Project, setProject] = useState({ id: "", name: "", budget: "" });
+  const [Actionplan, setActionplan] = useState({ id: "", name: "", budget: "" });
+  const [Strategic, setStrategic] = useState({ id: "", name: "", budget: "" });
   const [open, setOpen] = useState(false);
   const { id_strategic, id_actionplan } = use(params);
   const [isOpenModalAdd, setIsOpenModalAdd] = useState(false);
@@ -30,13 +31,17 @@ export default function HomeProject({ params }) {
   const [MaxBudget, setMaxBudget] = useState(0);
   useEffect(() => {
     const data = sessionStorage.getItem("actionplan_data");
-    if (!data) {
-      window.location.href = `/admin/strategic`;
+    const data_strategic = sessionStorage.getItem("strategic_data");
+
+    if (!data || !data_strategic) {
+      window.location.href = `/superadmin/strategic`;
     }
     console.log(data);
+    console.log(data);
+    console.log(data_strategic);
     if (data) {
-      const par_data = JSON.parse(data);
-      setProject(par_data);
+      setActionplan(JSON.parse(data));
+      setStrategic(JSON.parse(data_strategic));
     }
   }, []);
 
@@ -73,7 +78,11 @@ export default function HomeProject({ params }) {
   const handleModalSelect = (type) => {
     if (type === "new") {
       toggleModalAdd();
-      router.push(`./${id_actionplan}/addnewproject?total=${totalRows + 1}&maxbudget=${parseFloat(Project.budget-MaxBudget)}`);
+      router.push(
+        `./${id_actionplan}/addnewproject?total=${
+          totalRows + 1
+        }&maxbudget=${parseFloat(Actionplan.budget - MaxBudget)}`
+      );
     }
   };
 
@@ -92,7 +101,7 @@ export default function HomeProject({ params }) {
                 <ol className="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
                   <li className="inline-flex items-center">
                     <a
-                      href="/admin/strategic"
+                      href="/superadmin/strategic"
                       className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white"
                     >
                       <svg
@@ -125,7 +134,7 @@ export default function HomeProject({ params }) {
                         />
                       </svg>
                       <a
-                        href={`/admin/strategic/${id_strategic}`}
+                        href={`/superadmin/strategic/${id_strategic}`}
                         className="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white"
                       >
                         {id_strategic}
@@ -150,7 +159,7 @@ export default function HomeProject({ params }) {
                         />
                       </svg>
                       <span className="ms-1 text-sm font-medium text-gray-500 md:ms-2 dark:text-gray-400">
-                        {id_actionplan} : {Project.name}
+                        {id_actionplan} : {Actionplan.name}
                       </span>
                     </div>
                   </li>
@@ -162,13 +171,13 @@ export default function HomeProject({ params }) {
               </div>
               <div className="text-lg md:text-2xl  ">
                 {" "}
-                {id_actionplan} {Project.name}
+                {id_actionplan} {Actionplan.name}
               </div>
               <div className="flex justify-between ">
                 <div className="text-lg md:text-2xl  ">
                   {" "}
                   งบประมาณ{" "}
-                  {Number(Project.budget).toLocaleString("th-TH", {
+                  {Number(Actionplan.budget).toLocaleString("th-TH", {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 0,
                   })}{" "}
@@ -179,7 +188,7 @@ export default function HomeProject({ params }) {
                 <div className="text-lg md:text-2xl   ">
                   {" "}
                   คงเหลือ{" "}
-                  {Number(Project.Balance).toLocaleString("th-TH", {
+                  {Number(Actionplan.Balance).toLocaleString("th-TH", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}{" "}
@@ -198,12 +207,14 @@ export default function HomeProject({ params }) {
               </div>
             </div>
             <div>
-              {Project.id && (
+              {Actionplan.id && (
                 <DatatableProject
-                  id_action={Project.id}
+                  id_action={Actionplan.id}
                   val={{ id_strategic, id_actionplan }}
                   onTotalChange={setTotalRows}
                   onMaxBudgetChange={setMaxBudget}
+                  strategicName={Strategic.name}
+                  actionplanName={Actionplan.name}
                 />
               )}
             </div>

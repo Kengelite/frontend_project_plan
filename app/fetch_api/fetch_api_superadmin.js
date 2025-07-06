@@ -21,7 +21,7 @@ export async function GetDatayear(token) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -46,7 +46,7 @@ export async function GetDatayearall(token) {
     });
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -71,7 +71,7 @@ export async function GetDataprincipleUse(token) {
     });
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -96,7 +96,7 @@ export async function GetDatadepartmentUse(token) {
     });
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -121,7 +121,7 @@ export async function GetDatateacherUse(token) {
     });
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -146,7 +146,7 @@ export async function GetDataemployeeUse(token) {
     });
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -177,7 +177,7 @@ export async function GetDataOkrUse(token, year_id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -202,7 +202,7 @@ export async function GetDataunitUse(token) {
     });
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -227,7 +227,7 @@ export async function GetDatastyleUse(token) {
     });
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -255,7 +255,7 @@ export async function GetDataprojectUserByYear(token, id_year, page, per_page) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -285,7 +285,7 @@ export async function GetDataactionplanByidproject(
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -297,6 +297,77 @@ export async function GetDataactionplanByidproject(
   }
 }
 
+export async function GetDataPositionUse(token) {
+  // console.log(id_project);
+  try {
+    console.log("token : ", token);
+    const response = await axios.get(`${api}/api/v1/superadmin/position`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    });
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data?.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+
+export async function AddDataUser(token, formData) {
+  try {
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/userall`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data?.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+    throw message;
+  }
+}
+
+export async function EditDataUser(token, formData, id, key) {
+  try {
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/userall/${id}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+          "X-Secret-Key": key,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+    throw message;
+  }
+}
 export async function GetDataactivityUserByYear(
   token,
   id_year,
@@ -318,7 +389,7 @@ export async function GetDataactivityUserByYear(
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -348,7 +419,7 @@ export async function GetDataactionplanUserByidproject(
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -376,7 +447,7 @@ export async function GetAddProjectNew(token, data) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -388,13 +459,13 @@ export async function GetAddProjectNew(token, data) {
   }
 }
 
-
-export async function SendEmailActivity(token,id) {
+export async function GetAddActivityNew(token, data) {
   // console.log(id_project);
   try {
     // console.log("token : ", token);
-    const response = await axios.get(
-      `${api}/api/v1/superadmin/send-mail/${id}`,
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/activity`,
+      data,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -404,7 +475,337 @@ export async function SendEmailActivity(token,id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
+    return response.data?.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+
+export async function GetProject(token, project_id) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/projectid`,
+      {
+        project_id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function AddObjectiveNew(token, name_objective, id_project) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/addobjective`,
+      {
+        name_objective,
+        id_project,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function EditObjective(token, objective_id, name_objective) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/editobjective`,
+      {
+        objective_id,
+        name_objective,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function DeleteObjective(token, objective_id) {
+  console.log(objective_id);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/deleteobjective`,
+      {
+        objective_id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+
+export async function AddOkrprojectNew(token, id_okr, id_project) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/addokrproject`,
+      {
+        id_okr,
+        id_project,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function EditOkrproject(token, okr_project_id, id_okr) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/editokrproject`,
+      {
+        id_okr,
+        okr_project_id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function DeleteOkrproject(token, okr_project_id) {
+  console.log(okr_project_id);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/deleteokrproject`,
+      {
+        okr_project_id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+
+
+export async function AddprojectuserNew(token, id_user, id_project,type,id_year) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/projectuserall`,
+      {
+        id_user,
+        id_project,
+        type,
+        id_year
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function Editprojectuser(token, user_project_id, id_user) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/editprojectuser`,
+      {
+        id_user,
+        user_project_id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function Deleteprojectuser(token, user_project_id,type) {
+  // console.log(okr_project_id);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/deleteprojectuser`,
+      {
+        user_project_id,
+        type
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+
+export async function SendEmailActivity(token, id, type) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.get(
+      `${api}/api/v1/superadmin/send-mail/${id}/${type}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -416,6 +817,93 @@ export async function SendEmailActivity(token,id) {
   }
 }
 
+export async function GetDashboardProject(token, id_year) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/dashboard`,
+      {
+        id_year,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data?.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function GetDashboardPie(token, id_year) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/dashboardpie`,
+      {
+        id_year,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data?.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function GetDashboardLineDepartment(token, id_year) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/dashboardlinestrategicreport`,
+      {
+        id_year,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data?.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
 // export async function GetDataactionplanByYear(token,id_year, page = 1, per_page = 10) {
 //   //   console.log(id_actionplan);
 //   try {
@@ -439,7 +927,7 @@ export async function GetDataUserall(token, page = 1, per_page = 10) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -470,7 +958,7 @@ export async function GetDataokrall(token, page = 1, per_page = 10, id_year) {
     });
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -498,7 +986,7 @@ export async function GetDataprincipleall(token, page = 1, per_page = 10) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -526,7 +1014,7 @@ export async function GetDatastyleall(token, page = 1, per_page = 10) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -554,7 +1042,7 @@ export async function GetDatapositionall(token, page = 1, per_page = 10) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -582,7 +1070,7 @@ export async function GetDatadepartmentall(token, page = 1, per_page = 10) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -613,7 +1101,7 @@ export async function GetDatastrategicYear(token, year_id, page, per_page) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -636,7 +1124,7 @@ export async function GetDatastrategic(token) {
     });
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -663,7 +1151,7 @@ export async function GetDataactionplan(token) {
     });
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -695,7 +1183,7 @@ export async function GetDataactionplanByidstrategic(
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -722,7 +1210,7 @@ export async function GetDataproject(token) {
     });
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -757,7 +1245,7 @@ export async function GetDataprojectByidaction(
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -784,7 +1272,7 @@ export async function GetDataactivity(token, id_project) {
     });
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -817,7 +1305,7 @@ export async function GetDataactivitydetailByidactivity(
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -845,7 +1333,7 @@ export async function GetDatastrategicForAdd(token, year_id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -874,7 +1362,7 @@ export async function AddDatadepartment(token, departments_name) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -902,7 +1390,7 @@ export async function EditDatadepartment(token, departments_name, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -931,7 +1419,7 @@ export async function AddDataType(token, style_name) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -959,7 +1447,7 @@ export async function EditDatadeType(token, style_name, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -971,13 +1459,13 @@ export async function EditDatadeType(token, style_name, id) {
   }
 }
 
-export async function AddDataYear(token, year) {
+export async function AddDataYear(token, year, budget) {
   // console.log(id_project);
   try {
     console.log("token : ", token);
     const response = await axios.post(
       `${api}/api/v1/superadmin/yearall`,
-      { year },
+      { year, budget },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -988,7 +1476,7 @@ export async function AddDataYear(token, year) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -999,13 +1487,13 @@ export async function AddDataYear(token, year) {
     throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
   }
 }
-export async function EditDatadeYear(token, year, id) {
+export async function EditDatadeYear(token, year, id, budget) {
   // console.log(id_project);
   try {
     console.log("token : ", id);
     const response = await axios.put(
       `${api}/api/v1/superadmin/yearall/${id}`,
-      { year },
+      { year, budget },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1016,7 +1504,7 @@ export async function EditDatadeYear(token, year, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1045,7 +1533,7 @@ export async function AddDataPrinciple(token, principle_name) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1073,7 +1561,7 @@ export async function EditDatadePrinciple(token, principle_name, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1102,7 +1590,7 @@ export async function AddDataPosition(token, position_name) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1130,7 +1618,7 @@ export async function EditDatadePosition(token, position_name, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1164,7 +1652,7 @@ export async function AddDataStrategic(token, strategic) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1197,7 +1685,7 @@ export async function EditDataStrategic(token, strategic) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
 
     return response.data?.data ?? [];
   } catch (error) {
@@ -1233,7 +1721,7 @@ export async function AddDataActionplan(token, actionplan) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1267,7 +1755,7 @@ export async function EditDataActionplan(token, actionplan) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
 
     return response.data?.data ?? [];
   } catch (error) {
@@ -1307,7 +1795,7 @@ export async function AddDataActivitydetail(token, dataAddsend) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1345,7 +1833,7 @@ export async function EditDataActivitydetail(token, dataAddsend) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
 
     return response.data?.data ?? [];
   } catch (error) {
@@ -1375,7 +1863,7 @@ export async function UpdatestatusStrategic(token, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1404,7 +1892,7 @@ export async function UpdatestatusActionplan(token, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1433,7 +1921,7 @@ export async function UpdatestatusProject(token, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1462,7 +1950,7 @@ export async function UpdatestatusActivity(token, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1491,7 +1979,7 @@ export async function UpdatestatusActivityDetail(token, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1520,7 +2008,7 @@ export async function UpdatestatusOkr(token, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1549,7 +2037,7 @@ export async function UpdatestatusPrinciple(token, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1578,7 +2066,7 @@ export async function UpdatestatusStyle(token, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1607,7 +2095,7 @@ export async function UpdatestatusPosition(token, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1636,7 +2124,7 @@ export async function UpdatestatusYear(token, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1665,7 +2153,7 @@ export async function UpdatestatusDepartment(token, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1694,7 +2182,7 @@ export async function DeleteStrategic(token, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1723,7 +2211,7 @@ export async function DeleteActionplan(token, id_actionplan) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1752,7 +2240,7 @@ export async function DeleteProject(token, id_project) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1781,7 +2269,7 @@ export async function DeleteActivity(token, id_activity) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1810,7 +2298,7 @@ export async function DeletePrinciple(token, id_activity) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1822,7 +2310,7 @@ export async function DeletePrinciple(token, id_activity) {
   }
 }
 
-export async function DeleteUser(token, id) {
+export async function DeleteUser(token, id, key) {
   // console.log(id_activity);
   try {
     // console.log("token : ", token);
@@ -1831,12 +2319,13 @@ export async function DeleteUser(token, id) {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        "X-Secret-Key": key,
         Accept: "application/json",
       },
     });
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1862,7 +2351,7 @@ export async function DeleteOkr(token, id) {
     });
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1891,7 +2380,7 @@ export async function DeleteActivityDetail(token, id_activitydetail) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1919,7 +2408,7 @@ export async function DeleteStyle(token, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1948,7 +2437,7 @@ export async function DeletePosition(token, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -1974,7 +2463,7 @@ export async function DeleteYear(token, id) {
     });
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -2002,7 +2491,7 @@ export async function DeleteDepartment(token, id) {
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -2035,7 +2524,7 @@ export async function GetDataactionplanByYear(
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -2068,7 +2557,7 @@ export async function GetDataprojectByYear(
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -2101,7 +2590,7 @@ export async function GetDataactivityByYear(
     );
 
     // const json = await response.json();
-    console.log("data : ", response.data?.data);
+    // console.log("data : ", response.data?.data);
     return response.data?.data ?? [];
   } catch (error) {
     console.error("Error fetching user data:", error);

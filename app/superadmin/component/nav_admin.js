@@ -22,6 +22,7 @@ import {
   FaUserCircle,
   FaChartLine,
   FaRegCalendarAlt,
+  FaClipboardCheck
 } from "react-icons/fa";
 
 import Link from "next/link";
@@ -355,6 +356,19 @@ export default function Menu() {
               </div>
             )}
           </div>
+        )}
+        {role && role === "2" && (
+          <Link
+            href="/superadmin/approve"
+            className={`flex items-center gap-2 mb-2.5 hover:text-blue-500 ${
+              pathname.startsWith("/superadmin/approve")
+                ? "text-blue-500 font-semibold"
+                : "text-gray-700"
+            }`}
+          >
+            <FaClipboardCheck size={20} />
+            <span className="text-md">อนุมัติโอนงบกิจกรรม</span>
+          </Link>
         )}
         {role && role === "2" && (
           <Link

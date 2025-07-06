@@ -93,10 +93,25 @@ export default function DatatableYear({ onEdit }) {
       selector: (row) => row.year,
       sortable: true,
       wrap: true,
-      width: "600px",
+      width: "200px",
+    },
+    {
+      name: "งบประมาณ",
+      // selector: (row) => row.budget,
+      sortable: true,
+      wrap: true,
+      right: "true",
+      width: "300px",
+      cell: (row) =>
+        Number(row.budget).toLocaleString("th-TH", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }),
     },
     {
       name: "สถานะ",
+      // width: "400px",
+      center: "true",
       cell: (row) => (
         <div style={{ padding: "5px" }}>
           <Switch
@@ -145,7 +160,7 @@ export default function DatatableYear({ onEdit }) {
             <button
               className="rounded border-gray-200 p-2 hover:bg-gray-100 group"
               onClick={() => {
-                onEdit(row.year, row.year_id);
+                onEdit(row.year, row.year_id, row.budget);
               }}
             >
               <FiEdit2 className="text-xl text-gray-500 group-hover:text-black" />
@@ -168,9 +183,7 @@ export default function DatatableYear({ onEdit }) {
 
   useEffect(() => {
     const filtered = data.filter((data) => {
-      return `${data.year}`
-        .toLowerCase()
-        .includes(SearchTerm.toLowerCase());
+      return `${data.year}`.toLowerCase().includes(SearchTerm.toLowerCase());
     });
 
     setSecrchData(filtered);

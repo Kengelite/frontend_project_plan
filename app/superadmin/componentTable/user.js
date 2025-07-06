@@ -12,7 +12,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import { FiEdit2 } from "react-icons/fi";
 import Switch from "react-switch";
 import Swal from "sweetalert2";
-export default function DatatableUser({}) {
+export default function DatatableUser({ edit }) {
   const [data, setData] = useState([]);
 
   const [loading, setLoading] = useState(true);
@@ -24,31 +24,30 @@ export default function DatatableUser({}) {
 
     const result = await Swal.fire({
       title: "คุณแน่ใจหรือไม่ ?",
-      text: `คุณต้องการคุณต้องการลบ "${row.name}" หรือไม่
-        `,
+      html: `
+    <p>คุณต้องการลบ <strong>${row.name}</strong> หรือไม่</p>
+    <input type="password" id="secretKeyInput" class="swal2-input" placeholder="กรุณากรอก Secret Key">
+  `,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "gray",
       confirmButtonText: "ยืนยันการลบ",
       cancelButtonText: "ยกเลิก",
+      preConfirm: () => {
+        const secretKey = document.getElementById("secretKeyInput").value;
+        if (!secretKey) {
+          Swal.showValidationMessage("กรุณากรอก Secret Key");
+        }
+        return secretKey;
+      },
     });
 
-    if (result.isConfirmed) {
+    if (result.isConfirmed && result.value) {
       try {
         const token = Cookies.get("token");
-        const response = await DeleteUser(token, row.id);
-        // if(response)
-        console.log(response);
+        const response = await DeleteUser(token, row.id, result.value); // ส่ง secretKey ไป
+
         if (response) {
-          // setData((prevData) =>
-          //   prevData.filter((item) => item.id !== row.id)
-          // );
-          console.log("การลบสำเร็จ");
-          setData((prevData) =>
-            prevData.filter((item) => item.id != row.id)
-          );
-          // ทำการดำเนินการเพิ่มเติมที่ต้องการเมื่อการอัปเดตสำเร็จ
+          setData((prevData) => prevData.filter((item) => item.id !== row.id));
           Swal.fire({
             title: "ลบข้อมูลสำเร็จ",
             text: "ข้อมูลถูกลบออกจากระบบแล้ว",
@@ -66,7 +65,7 @@ export default function DatatableUser({}) {
       } catch (err) {
         Swal.fire({
           title: "เกิดข้อผิดพลาด",
-          text: "กรุณาลองใหม่อีกครั้ง",
+          text: err || "กรุณาลองใหม่อีกครั้ง",
           icon: "error",
           confirmButtonText: "ตกลง",
         });
@@ -113,14 +112,14 @@ export default function DatatableUser({}) {
         })} `,
     },
     {
-        name: "จำนวนกิจกรรมที่รับผิดชอบ",
-        sortable: true,
-        cell: (row) =>
-          `${Number(row.budget - row.spend_money).toLocaleString("th-TH", {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          })} `,
-      },
+      name: "จำนวนกิจกรรมที่รับผิดชอบ",
+      sortable: true,
+      cell: (row) =>
+        `${Number(row.budget - row.spend_money).toLocaleString("th-TH", {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        })} `,
+    },
     {
       name: "จัดการ",
       width: "200px",
@@ -152,20 +151,7 @@ export default function DatatableUser({}) {
           <div style={{ padding: "5px" }}>
             <button
               className="rounded border-gray-200 p-2 hover:bg-gray-100 group"
-              onClick={() => {
-                // เก็บข้อมูลที่ต้องส่งไว้ใน sessionStorage
-                sessionStorage.setItem(
-                  "strategic_data",
-                  JSON.stringify({
-                    id: row.id,
-                    name: row.strategic_name,
-                    budget: row.budget,
-                  })
-                );
-
-                // เปลี่ยนหน้า
-                window.location.href = `/admin/strategic/${row.project_number}`;
-              }}
+              onClick={() => edit(row)}
             >
               <FiEdit2 className="text-xl text-gray-500 group-hover:text-black" />
             </button>
@@ -198,7 +184,6 @@ export default function DatatableUser({}) {
 
     setSecrchData(filtered);
   }, [SearchTerm, data]);
-
 
   const customStyles = {
     headCells: {
@@ -267,13 +252,17 @@ export default function DatatableUser({}) {
         </div>
       ) : (
         <div>
-          <input
-            type="text"
-            className="form-control my-3  p-2  w-full  border border-gray-300 rounded-md"
-            placeholder="ค้นหา..."
-            value={SearchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <form autoComplete="off">
+            <input
+              type="text"
+              name="search_134xyz"
+              autoComplete="new-password"
+              value={SearchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="form-control my-3  p-2 w-full border border-gray-300 rounded-md"
+              placeholder="ค้นหา..."
+            />
+          </form>
           <div
             className="bg-white rounded-md border
         border-gray-200 shadow-xl mt-3 

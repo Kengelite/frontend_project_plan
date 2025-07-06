@@ -135,6 +135,8 @@ export default function addProject({ params }) {
       setdataAddNewProject((prev) => ({
         ...prev,
         id_year: strategic.year_id,
+        time_start: `${strategic.year - 1}-10-01`,
+        time_end: `${strategic.year}-09-30`,
       }));
     }
   }, [strategic]);
@@ -692,14 +694,15 @@ export default function addProject({ params }) {
             <div className="bg-gray-100  xl:col-span-2 hidden md:block md:col-span-3 pt-4 ps-3">
               <Menu />
             </div>
-            <div className="col-span-12 xl:col-span-10  md:col-span-9 mt-5 ms-4 md:mt-3 me-4 md:me-6">
-              <div className="flex flex-row items-center justify-between">
+            <div className="col-span-12 xl:col-span-10  md:col-span-9 mt-5 ms-4 md:mt-3 me-4 md:me-6 border border-gray-300 rounded-lg  ">
+              <div className="flex flex-row items-center justify-between py-4 px-8">
                 <div className="text-lg md:text-3xl">
                   แบบฟอร์มโครงการตามแผนปฏิบัติการ วิทยาลัยการคอมพิวเตอร์
                   มหาวิทยาลัยขอนแก่น
                 </div>
               </div>
-              <div className="grid grid-cols-12 gap-x-8 gap-y-6 mt-3">
+              <hr className="w-full border-gray-300" />
+              <div className="grid grid-cols-12 gap-x-8 gap-y-6 mt-3 py-4 px-8">
                 <div className="col-span-12 md:col-span-6">
                   <span className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                     ชื่อโครงการ
@@ -820,14 +823,7 @@ export default function addProject({ params }) {
                           className="bg-gray-50  xl:w-67 md:w-38 w-38 shadow-md border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                           placeholder="Select date start"
                           value={dataAddNewProject.time_start}
-                          min={actionplan.start_date}
-                          max={actionplan.end_date}
-                          onChange={(e) =>
-                            setdataAddNewProject((prev) => ({
-                              ...prev,
-                              time_start: e.target.value,
-                            }))
-                          }
+                          readOnly
                         />
                       </div>
                       <span className="mx-4 text-gray-500">to</span>
@@ -847,22 +843,10 @@ export default function addProject({ params }) {
                           id="datepicker-range-end"
                           name="end"
                           type="date"
-                          disabled={!dataAddNewProject.time_start}
-                          className={`xl:w-67 md:w-39 w-39 ${
-                            !dataAddNewProject.time_start
-                              ? "bg-gray-100"
-                              : "bg-white"
-                          }   border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block  ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500`}
+                          className="bg-gray-50  xl:w-67 md:w-38 w-38 shadow-md border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                           placeholder="Select date end"
                           value={dataAddNewProject.time_end}
-                          min={dataAddNewProject.time_start || ""}
-                          max={actionplan.end_date}
-                          onChange={(e) =>
-                            setdataAddNewProject((prev) => ({
-                              ...prev,
-                              time_end: e.target.value,
-                            }))
-                          }
+                          readOnly
                         />
                       </div>
                     </div>

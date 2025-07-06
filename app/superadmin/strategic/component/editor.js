@@ -43,7 +43,7 @@ export default function CustomEditor({ value, onChange }) {
         onReady={(editor) => {
           editor.editing.view.change((writer) => {
             const root = editor.editing.view.document.getRoot();
-            writer.setStyle("padding", "1rem 2rem", root);
+            writer.setStyle("padding", "1rem 1.5rem", root);
           });
 
           // ดัก event Tab

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 
+import _ from "lodash";
+import Swal from "sweetalert2";
 // ตรวจสอบให้แน่ใจว่า export ฟังก์ชันคอมโพเนนต์ถูกต้อง
 // In component/modal.js
 import Select from "react-select";
+import Cookies from "js-cookie";
 
-export function ModalAddActivity({ isOpen, onClose, onSelect }) {
+export function ModalAddActionplan({ isOpen, onClose, onSelect }) {
   if (!isOpen) return null;
 
   return (
@@ -58,7 +61,7 @@ export function ModalAddActivity({ isOpen, onClose, onSelect }) {
           </svg>
 
           <h3 className="mb-5 text-lg font-normal text-gray-500">
-            คุณต้องการเพิ่มโครงการใหม่ ?
+            คุณต้องการเพิ่ม OKR ใหม่ ?
           </h3>
 
           <button
@@ -74,7 +77,7 @@ export function ModalAddActivity({ isOpen, onClose, onSelect }) {
             type="button"
             className="text-white bg-orange-500 hover:bg-orange-600 font-medium rounded-lg text-sm px-5 py-2.5"
           >
-            สร้างกิจกรรมใหม่
+            สร้าง OKR ใหม่
           </button>
         </div>
       </div>

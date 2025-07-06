@@ -8,7 +8,7 @@ import DatatableUser from "../../componentTable/user";
 import DatatableProject from "./tableProject";
 import DatatableActivity from "./tableActivity";
 import dynamic from "next/dynamic";
-import { GetDatayear } from "../../../fetch_api/fetch_api_admin";
+import { GetDatayear } from "../../../fetch_api/fetch_api_superadmin";
 import Select from "react-select";
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,

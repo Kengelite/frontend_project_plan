@@ -19,7 +19,6 @@ import DatatableYear from "../../componentTable/year";
 import { ModalAddYear } from "../modal/modal_year";
 
 export default function Homeprinciples() {
-
   const [isOpenModalAdd, setIsOpenModalAdd] = useState(false);
   const [type, settype] = useState(null);
   const [data, setdata] = useState({
@@ -36,13 +35,14 @@ export default function Homeprinciples() {
     setIsOpenModalAdd(!isOpenModalAdd); // เปลี่ยนสถานะของ modal
   };
 
-  const toggleModalEdit = (newname, id) => {
+  const toggleModalEdit = (newname, id, budget) => {
     settype(2);
     console.log(newname);
     setdata((prev) => ({
       ...prev,
       id: id,
       name: newname,
+      budget: budget,
     }));
     setIsOpenModalAdd(!isOpenModalAdd); // เปลี่ยนสถานะของ modal
   };
@@ -78,7 +78,9 @@ export default function Homeprinciples() {
           <div className="col-span-12 xl:col-span-10  md:col-span-9 mt-5 ms-4 md:mt-3 me-4 md:me-6">
             <div className="flex flex-row items-center justify-between">
               <div className="flex flex-row items-center">
-                <div className="text-lg md:text-2xl me-3">ปีงบประมาณทั้งหมด</div>
+                <div className="text-lg md:text-2xl me-3">
+                  ปีงบประมาณทั้งหมด
+                </div>
               </div>
               <button
                 onClick={toggleModalAdd}
@@ -88,7 +90,7 @@ export default function Homeprinciples() {
               </button>
             </div>
             <div>
-              <DatatableYear   onEdit={toggleModalEdit}/>
+              <DatatableYear onEdit={toggleModalEdit} />
               {/* <DatatableProject /> */}
             </div>
           </div>

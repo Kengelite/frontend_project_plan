@@ -235,17 +235,24 @@ export default function DatatablePosition({ onEdit }) {
     }
   };
 
-  const customStyles = {
+   const customStyles = {
     headCells: {
       style: {
         backgroundColor: "#f0f0f0", // สีพื้นหลังหัวตาราง
         color: "#1f2937", // สีตัวอักษร (เทาเข้ม)
         fontWeight: "bold",
         fontSize: "14px",
+       padding:"1.25em 1em",
+      },
+    },
+    rows: {
+      style: {
+        // height: "2em", // เพิ่มความสูงของแถว
+        padding:"0.75em 0",
+        minHeight: "60px", // กำหนดขนาดขั้นต่ำของแถว
       },
     },
   };
-
   const [totalRows, setTotalRows] = useState(0);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10); // default เป็น 10

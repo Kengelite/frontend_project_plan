@@ -10,6 +10,7 @@ import { CKEditor, useCKEditorCloud } from "@ckeditor/ckeditor5-react";
 import { FiEdit2 } from "react-icons/fi";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import dynamic from "next/dynamic";
+import _ from "lodash";
 import Swal from "sweetalert2";
 // import CustomEditor from "../../../component/create_editor";
 const CustomEditor = dynamic(() => import("../../../../component/editor"), {
@@ -26,11 +27,12 @@ import {
   GetDataemployeeUse,
   GetDataunitUse,
   GetDatastyleUse,
-  GetAddProjectNew,
+  GetEditProject,
   DeleteObjective,
   DeleteOkrproject,
   GetProject,
   Deleteprojectuser,
+  Deleteindicator,
 } from "../../../../../../fetch_api/fetch_api_superadmin";
 import {
   ModalAddOkrNew,
@@ -45,6 +47,11 @@ export default function addProject({ params }) {
   const total = searchParams.get("total");
   const maxbudget = searchParams.get("maxbudget");
   const [isOpenModalOKRAdd, setIsOpenModalOKRAdd] = useState({
+    isOpen: false,
+    type: null,
+    data: null,
+  });
+  const [isOpenModalindicatorAdd, setIsOpenModalindicatorAdd] = useState({
     isOpen: false,
     type: null,
     data: null,
@@ -65,10 +72,33 @@ export default function addProject({ params }) {
     data: null,
   });
   const [isOpenModalUserAdd, setIsOpenModalUserAdd] = useState(false);
-  const [isOpenModalindicatorAdd, setIsOpenModalindicatorAdd] = useState();
+  // const [isOpenModalindicatorAdd, setIsOpenModalindicatorAdd] = useState();
   const { id_strategic, id_actionplan } = use(params);
   const [overBudget, setOverBudget] = useState(false);
   const [dataProject, setdataProject] = useState({
+    project_id: "",
+    project_name: "",
+    project_number: null,
+    location: "",
+    id_department: null,
+    id_year: null,
+    id_strategic: null,
+    id_actionplan: null,
+    project_principle: [],
+    budget: "",
+    time_start: "",
+    time_end: "",
+    style_detail: [],
+    okr_detail_project: [],
+    objective: [],
+    employee: [],
+    teacher: [],
+    indicator: [],
+    abstract: "",
+    obstacle: "",
+    result: "",
+  });
+  const [olddataProject, setolddataProject] = useState({
     project_id: "",
     project_name: "",
     project_number: null,
@@ -100,13 +130,15 @@ export default function addProject({ params }) {
     // const saved = Cookies.get("dataProject");
     async function fetchData() {
       const data_actionplan = sessionStorage.getItem("actionplan_data");
+      const data_strategic = sessionStorage.getItem("strategic_data");
       const data_project = sessionStorage.getItem("project_edit");
-      if (!data_actionplan || !data_project) {
+      if (!data_actionplan || !data_project || !data_strategic) {
         window.location.href = `/superadmin/strategic`;
         return;
       }
 
       const parsed_actionplan = JSON.parse(data_actionplan);
+      const parsed_strategic = JSON.parse(data_strategic);
       setActionplan(JSON.parse(data_actionplan));
       const par_project = JSON.parse(data_project);
       // console.log(par_project.data.project_id);
@@ -167,6 +199,32 @@ export default function addProject({ params }) {
           budget: res_data.budget,
           time_start: res_data.time_start,
           time_end: res_data.time_end,
+          id_actionplan: parsed_actionplan.id,
+          id_strategic: parsed_strategic.id,
+          abstract: res_data.abstract,
+          id_department: res_data.id_department,
+          result: res_data.result,
+          obstacle: res_data.obstacle,
+          id_year: res_data.id_year,
+          objective: object_map,
+          project_principle: principle_map,
+          style_detail: style_map,
+          okr_detail_project: okr_map,
+          employee: emp_map,
+          teacher: teacher_map,
+          indicator: indicator_map,
+        }));
+        setolddataProject((prev) => ({
+          ...prev,
+          project_id: par_project.data.project_id,
+          project_name: res_data.project_name,
+          project_number: res_data.project_number,
+          location: res_data.location,
+          budget: res_data.budget,
+          time_start: res_data.time_start,
+          time_end: res_data.time_end,
+          id_actionplan: parsed_actionplan.id,
+          id_strategic: parsed_strategic.id,
           abstract: res_data.abstract,
           id_department: res_data.id_department,
           result: res_data.result,
@@ -278,6 +336,7 @@ export default function addProject({ params }) {
   }, []);
 
   const [optionsOkr, setoptionsOkr] = useState([]);
+  // const [optionsUnit, setoptionsOkr] = useState([]);
   useEffect(() => {
     async function fetchData() {
       try {
@@ -390,6 +449,57 @@ export default function addProject({ params }) {
       color: "#9ca3af", // สีของ placeholder
     }),
   };
+
+  const deleted_indicator = async (row, type) => {
+    console.log(row);
+    try {
+      if (dataProject.indicator.length == 1 ) {
+        Swal.fire({
+          title: "ไม่สามารถลบได้ ",
+          text: `ไม่สามารถลบได้เนื่องจากเป็นลำดับสุดท้ายของข้อมูล`,
+          icon: "warning",
+          confirmButtonText: "ตกลง",
+        });
+        return;
+      }
+      Swal.fire({
+        title: `การลบข้อมูล ${row.indicator_name}`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "บันทึก",
+        cancelButtonText: "ยกเลิก",
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const token = Cookies.get("token");
+          const res = await Deleteindicator(token, row.id);
+
+          if (res?.status === 200) {
+            Swal.fire({
+              title: "สำเร็จ",
+              text: `ลบ ${row.indicator_name}`,
+              icon: "success",
+              confirmButtonText: "ตกลง",
+            });
+            setdataProject((prev) => ({
+              ...prev,
+              indicator: prev.indicator.filter((item) => item.id !== row.id),
+            }));
+          } else {
+            Swal.fire({
+              title: "เกิดข้อผิดพลาด",
+              text: "กรุณาลองใหม่อีกครั้ง",
+              icon: "error",
+              confirmButtonText: "ตกลง",
+            });
+          }
+        }
+      });
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการลบ:", error);
+    }
+  };
   const columns = [
     {
       name: "ลำดับ",
@@ -421,17 +531,26 @@ export default function addProject({ params }) {
       cell: (row) => (
         <>
           <div style={{ padding: "5px" }}>
+            <button
+              className="rounded border-gray-200 p-2 hover:bg-gray-100 group"
+              onClick={
+                () =>
+                  setIsOpenModalindicatorAdd({
+                    isOpen: true,
+                    type: 2,
+                    data: row,
+                  })
+                // console.log(row)
+              }
+            >
+              <FiEdit2 className="text-xl text-gray-500 group-hover:text-black" />
+            </button>
+          </div>
+          <div style={{ padding: "5px" }}>
             {" "}
             <button
               className="rounded border-gray-200 p-2 hover:bg-gray-100  group"
-              onClick={() =>
-                setdataProject((prev) => ({
-                  ...prev,
-                  indicator: prev.indicator.filter(
-                    (item) => item.id !== row.id
-                  ),
-                }))
-              }
+              onClick={() => deleted_indicator(row)}
             >
               <i className="bi bi-trash text-xl group-hover:text-red-500"></i>{" "}
             </button>
@@ -445,6 +564,15 @@ export default function addProject({ params }) {
   const deleted_okr = async (row) => {
     console.log(row);
     try {
+      if (dataProject.okr_detail_project.length == 1) {
+        Swal.fire({
+          title: "ไม่สามารถลบได้ ",
+          text: `ไม่สามารถลบได้เนื่องจากเป็นลำดับสุดท้ายของข้อมูล`,
+          icon: "warning",
+          confirmButtonText: "ตกลง",
+        });
+        return;
+      }
       Swal.fire({
         title: `การลบข้อมูล ${row.name}`,
         icon: "question",
@@ -533,6 +661,15 @@ export default function addProject({ params }) {
 
   const deleted_objective = async (row) => {
     try {
+      if (dataProject.objective.length == 1) {
+        Swal.fire({
+          title: "ไม่สามารถลบได้ ",
+          text: `ไม่สามารถลบได้เนื่องจากเป็นลำดับสุดท้ายของข้อมูล`,
+          icon: "warning",
+          confirmButtonText: "ตกลง",
+        });
+        return;
+      }
       Swal.fire({
         title: `การลบข้อมูล ${row.name}`,
         icon: "question",
@@ -814,15 +951,41 @@ export default function addProject({ params }) {
     setEditorData(data);
   };
 
-  const handleAddproject = async (row) => {
+  const handleEditproject = async (row) => {
     // const newStatus = row.status === 1 ? 0 : 1;
-
+    console.log(row);
     const isEmpty = (value) => {
       if (Array.isArray(value)) return value.length === 0;
       return value === null || value === "";
     };
-
-    const ignoreFields = ["id_project", "result"];
+    if (
+      row.project_name === olddataProject.project_name &&
+      row.project_number === olddataProject.project_number &&
+      row.id_department === olddataProject.id_department &&
+      row.abstract === olddataProject.abstract &&
+      row.result === olddataProject.result &&
+      row.obstacle === olddataProject.obstacle &&
+      JSON.stringify(row.style_detail) ===
+        JSON.stringify(olddataProject.style_detail) &&
+      JSON.stringify(row.project_principle) ===
+        JSON.stringify(olddataProject.project_principle) &&
+      row.location === olddataProject.location
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "ยังไม่มีการแก้ไขข้อมูล",
+      });
+      return;
+    }
+    const ignoreFields = [
+      "id_project",
+      "result",
+      "indicator",
+      "teacher",
+      "employee",
+      "objective",
+      "okr_detail_project",
+    ];
 
     const emptyFields = Object.entries(dataProject)
       .filter(([key]) => !ignoreFields.includes(key))
@@ -836,17 +999,12 @@ export default function addProject({ params }) {
       id_department: "หน่วยงานที่รับผิดชอบ",
       year: "ปีงบประมาณ",
       id_strategic: "ยุทธศาสตร์",
-      id_actionplan: "แผนปฏิบัติการ",
+      id_actionplan: "กลยุทธ์",
       project_principle: "หลักการและเหตุผล",
       budget: "งบประมาณ",
       time_start: "วันเริ่มต้น",
       time_end: "วันสิ้นสุด",
       style_detail: "ลักษณะโครงการ",
-      okr_detail_project: "OKR",
-      objective: "วัตถุประสงค์",
-      employee: "เจ้าหน้าที่ผู้รับผิดชอบ",
-      teacher: "อาจารย์ผุ้รับผิดชอบ",
-      indicator: "ตัวชี้วัด",
       abstract: "บทคัดย่อ",
       obstacle: "อุปสรรค",
     };
@@ -886,7 +1044,7 @@ export default function addProject({ params }) {
     if (result.isConfirmed) {
       try {
         const token = Cookies.get("token");
-        const response = await GetAddProjectNew(token, row);
+        const response = await GetEditProject(token, row);
         // if(response)
         console.log(response);
         if (response) {
@@ -905,8 +1063,8 @@ export default function addProject({ params }) {
             icon: "success",
             confirmButtonText: "ตกลง",
           }).then(() => {
-            Cookies.remove("dataProject", { path: "/" });
-            window.history.back();
+            // Cookies.remove("dataProject", { path: "/" });
+            window.location.reload();
           });
         } else {
           Swal.fire({
@@ -919,7 +1077,7 @@ export default function addProject({ params }) {
       } catch (err) {
         Swal.fire({
           title: "เกิดข้อผิดพลาด",
-          text: `ไม่สามารถเพิ่มข้อมูลเนื่องจาก ${err} กรุณาลองใหม่อีกครั้ง`,
+          text: `ไม่สามารถเพิ่มข้อมูล กรุณาลองใหม่อีกครั้ง`,
           icon: "error",
           confirmButtonText: "ตกลง",
         });
@@ -1388,7 +1546,7 @@ export default function addProject({ params }) {
                 <div className="col-span-12 mt-4 flex flex-row justify-end">
                   <button
                     type="button"
-                    onClick={() => handleAddproject(dataProject)}
+                    onClick={() => handleEditproject(dataProject)}
                     className="bg-green-500 text-white text-sm px-12 py-2 rounded-md hover:bg-blue-600"
                   >
                     บันทึก
@@ -1489,7 +1647,13 @@ export default function addProject({ params }) {
                       <h2>ตัวชี้วัดและค่าเป้าหมายของโครงการ/กิจกรรม </h2>
                       <button
                         type="button"
-                        onClick={() => setIsOpenModalindicatorAdd(true)}
+                        onClick={() =>
+                          setIsOpenModalindicatorAdd({
+                            isOpen: true,
+                            type: 1,
+                            data: null,
+                          })
+                        }
                         className=" top-9 right-2 bg-blue-500 text-white text-sm px-8 py-1.5 rounded-md hover:bg-blue-600"
                       >
                         เพิ่ม
@@ -1788,43 +1952,65 @@ export default function addProject({ params }) {
           user={optionsteacher}
         />
       )}
-      {isOpenModalindicatorAdd && (
+      {isOpenModalindicatorAdd.isOpen && (
         <ModalAddindicatorNew
-          onClose={() => setIsOpenModalindicatorAdd(false)}
-          isOpen={ModalAddindicatorNew}
-          type={1}
-          unit={optionsUnit}
-          olduser={dataProject.indicator}
+          onClose={() =>
+            setIsOpenModalindicatorAdd({ isOpen: false, type: null })
+          }
+          isOpen={isOpenModalindicatorAdd.isOpen}
+          type={isOpenModalindicatorAdd.type}
+          data={dataProject.indicator}
+          indicator={isOpenModalindicatorAdd.data}
+          id_project={dataProject.project_id}
+          id_year={dataProject.id_year}
+          olduser={isOpenModalindicatorAdd.data}
           onSelectindicator={(selectedOkrValue) => {
-            // console.log(selectedOkrValue),
-            setdataProject((prev) => {
-              const exists = (prev.indicator || []).some(
-                (item) =>
-                  item.indicator_name === selectedOkrValue.indicator_name
-              );
+            if (isOpenModalindicatorAdd.type === 1) {
+              setdataProject((prev) => {
+                const exists = (prev.indicator || []).some(
+                  (item) => item.id === selectedOkrValue.id
+                );
 
-              // const exists_unit = (prev.indicator || []).some(
-              //   (item) =>
-              //     item.unit_name.value === selectedOkrValue.unit_name.value
-              // );
+                if (exists) return prev;
 
-              if (exists) return prev;
-              const newId = (prev.indicator?.length || 0) + 1;
-              return {
+                return {
+                  ...prev,
+                  indicator: [
+                    ...(prev.indicator || []),
+                    {
+                      id: selectedOkrValue.id,
+                      indicator_name: selectedOkrValue.name,
+                      unit_name: {
+                        value: selectedOkrValue.unit_id,
+                        label: selectedOkrValue.unit_name,
+                      },
+                      goal: selectedOkrValue.goal,
+                    },
+                  ],
+                };
+              });
+            } else {
+              // console.log(selectedOkrValue);
+              // console.log(dataProject);
+              setdataProject((prev) => ({
                 ...prev,
-                indicator: [
-                  ...(prev.indicator || []),
-                  {
-                    id: newId,
-                    indicator_name: selectedOkrValue.indicator_name,
-                    unit_name: selectedOkrValue.unit_name,
-                    goal: selectedOkrValue.goal,
-                  },
-                ],
-              };
-            });
+                indicator: prev.indicator.map((item) =>
+                  item.id === selectedOkrValue.id
+                    ? {
+                        ...item,
+                        indicator_name: selectedOkrValue.name,
+                        unit_name: {
+                          value: selectedOkrValue.unit_id,
+                          label: selectedOkrValue.unit_name,
+                        },
+                        goal: selectedOkrValue.goal,
+                      }
+                    : item
+                ),
+              }));
+            }
           }}
-          user={optionsteacher}
+          unit={optionsUnit}
         />
       )}
     </>

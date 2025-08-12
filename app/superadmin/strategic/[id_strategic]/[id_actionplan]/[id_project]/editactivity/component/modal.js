@@ -4,15 +4,15 @@ import { useState, useEffect } from "react";
 import Select from "react-select";
 
 import {
-  AddObjectiveNew,
-  EditObjective,
-  AddOkrprojectNew,
-  EditOkrproject,
-  AddprojectuserNew,
-  Editprojectuser,
-  AddIndicatorNew,
-  EditIndicaton,
-} from "../../../../../../fetch_api/fetch_api_superadmin";
+  AddObjectiveactivityNew,
+  EditObjectiveactivity,
+  AddOkractivityNew,
+  EditOkractivity,
+  AddactivityuserNew,
+  Editactivityuser,
+  AddIndicatoractivityNew,
+  EditIndicatoractivity,
+} from "../../../../../../../fetch_api/fetch_api_superadmin";
 import _ from "lodash";
 import Swal from "sweetalert2";
 import Cookies from "js-cookie";
@@ -22,14 +22,14 @@ export function ModalAddOkrNew({
   type,
   okr,
   old,
-  id_project,
+  id_activity,
   data,
   onSelectOkr,
 }) {
   if (!isOpen) return null;
 
   const [idOkrProject, setidOkrProject] = useState(
-    type == 1 ? "" : old.id_okr_project
+    type == 1 ? "" : old.okr_detail_activity_id
   );
   const [selectedOkrproject, setSelectedOkrproject] = useState(
     type == 1
@@ -114,19 +114,19 @@ export function ModalAddOkrNew({
     }).then(async (result) => {
       if (result.isConfirmed) {
         const token = Cookies.get("token");
-        console.log(id_project);
+        console.log(id_activity);
         if (type == 1) {
-          const res = await AddOkrprojectNew(
+          const res = await AddOkractivityNew(
             token,
             selectedOkrproject.value,
-            id_project
+            id_activity
           );
           console.log(res);
           if (res.status === 200 || res.status === 201) {
             onSelectOkr({
               label: selectedOkrproject.label,
               value: res.data.value,
-              id: res.data.okr_detail_project_id,
+              id: res.data.okr_detail_activity_id,
             });
             Swal.fire({
               title: "สำเร็จ",
@@ -138,7 +138,7 @@ export function ModalAddOkrNew({
             });
           }
         } else {
-          const res = await EditOkrproject(
+          const res = await EditOkractivity(
             token,
             idOkrProject,
             selectedOkrproject.value
@@ -254,7 +254,7 @@ export function ModalAddObjectiveNew({
   type,
   objective,
   old,
-  id_project,
+  id_activity,
   onSelectOkr,
 }) {
   if (!isOpen) return null;
@@ -308,19 +308,19 @@ export function ModalAddObjectiveNew({
     }).then(async (result) => {
       if (result.isConfirmed) {
         const token = Cookies.get("token");
-        console.log(id_project);
+        console.log(id_activity);
         if (type == 1) {
-          const res = await AddObjectiveNew(
+          const res = await AddObjectiveactivityNew(
             token,
             selectedStrategic.name,
-            id_project
+            id_activity
           );
           console.log(res);
           if (res.status === 200 || res.status === 201) {
             if (selectedStrategic.name.trim() !== "") {
               onSelectOkr({
                 name: selectedStrategic.name,
-                id: res.data.objective_id,
+                id: res.data.objective_activity_id,
               });
             }
             Swal.fire({
@@ -333,7 +333,7 @@ export function ModalAddObjectiveNew({
             });
           }
         } else {
-          const res = await EditObjective(
+          const res = await EditObjectiveactivity(
             token,
             selectedStrategic.id,
             selectedStrategic.name
@@ -449,7 +449,7 @@ export function ModalAddUserNew({
   user,
   olduser,
   data,
-  id_project,
+  id_activity,
   id_year,
   onSelectuser,
 }) {
@@ -462,12 +462,12 @@ export function ModalAddUserNew({
       : {
           value: olduser.id,
           label: olduser.name,
-          id_project_users: olduser.id_project_users,
+          id_activity_user: olduser.id_activity_user,
         }
   );
 
   const [idUserProject, setidUserProject] = useState(
-    type == 1 ? "" : olduser.id_project_users
+    type == 1 ? "" : olduser.id_activity_user
   );
 
   const customStyles = {
@@ -531,19 +531,19 @@ export function ModalAddUserNew({
         const token = Cookies.get("token");
         console.log(id_year);
         if (type == 1) {
-          const res = await AddprojectuserNew(
+          const res = await AddactivityuserNew(
             token,
             Employee.value,
-            id_project,
+            id_activity,
             1,
             id_year
           );
-          // console.log(res);
+          console.log(res);
           if (res.status === 200 || res.status === 201) {
             onSelectuser({
               label: Employee.label,
-              value: res.data.value,
-              id: res.data.okr_detail_project_id,
+              value: res.data.id_activity_user,
+              // id: res.data.okr_detail_activity_id,
               position: Employee.position,
             });
             Swal.fire({
@@ -556,7 +556,9 @@ export function ModalAddUserNew({
             });
           }
         } else {
-          const res = await Editprojectuser(
+          console.log(idUserProject);
+          console.log(Employee);
+          const res = await Editactivityuser(
             token,
             idUserProject,
             Employee.value
@@ -566,7 +568,7 @@ export function ModalAddUserNew({
             onSelectuser({
               label: Employee.label,
               value: res.data.id_user,
-              id: res.data.id_project_user,
+              id: res.data.id_activity_user,
               position: Employee.position,
             });
             Swal.fire({
@@ -683,7 +685,7 @@ export function ModalAddTeacherNew({
   user,
   olduser,
   data,
-  id_project,
+  id_activity,
   id_year,
   onSelectuser,
 }) {
@@ -696,12 +698,12 @@ export function ModalAddTeacherNew({
       : {
           value: olduser.id,
           label: olduser.name,
-          id_project_users: olduser.id_project_users,
+          id_activity_user: olduser.id_activity_user,
         }
   );
 
   const [idUserProject, setidUserProject] = useState(
-    type == 1 ? "" : olduser.id_project_users
+    type == 1 ? "" : olduser.id_activity_user
   );
 
   const customStyles = {
@@ -769,19 +771,19 @@ export function ModalAddTeacherNew({
         const token = Cookies.get("token");
         console.log(id_year);
         if (type == 1) {
-          const res = await AddprojectuserNew(
+          const res = await AddactivityuserNew(
             token,
             Employee.value,
-            id_project,
+            id_activity,
             2,
             id_year
           );
-          // console.log(res);
+          console.log(res.data);
           if (res.status === 200 || res.status === 201) {
             onSelectuser({
               label: Employee.label,
               value: res.data.value,
-              id: res.data.id_project_user,
+              // id: res.data.id_activity_user,
               position: Employee.position,
             });
             Swal.fire({
@@ -794,7 +796,8 @@ export function ModalAddTeacherNew({
             });
           }
         } else {
-          const res = await Editprojectuser(
+          console.log(Employee);
+          const res = await Editactivityuser(
             token,
             idUserProject,
             Employee.value
@@ -804,7 +807,7 @@ export function ModalAddTeacherNew({
             onSelectuser({
               label: Employee.label,
               value: res.data.id_user,
-              id: res.data.id_project_user,
+              id: res.data.id_activity_user,
               position: Employee.position,
             });
             Swal.fire({
@@ -923,7 +926,7 @@ export function ModalAddindicatorNew({
   indicator,
   unit,
   data,
-  id_project,
+  id_activity,
   onSelectindicator,
 }) {
   if (!isOpen) return null;
@@ -1028,13 +1031,13 @@ export function ModalAddindicatorNew({
     }).then(async (result) => {
       if (result.isConfirmed) {
         const token = Cookies.get("token");
-        console.log(id_project);
+        console.log(id_activity);
         if (type == 1) {
-          const res = await AddIndicatorNew(
+          const res = await AddIndicatoractivityNew(
             token,
             dataIndicator.unit_id,
             dataIndicator.goal,
-            id_project,
+            id_activity,
             dataIndicator.indicator_name
           );
           console.log(res);
@@ -1044,7 +1047,7 @@ export function ModalAddindicatorNew({
               unit_name: dataIndicator.unit_name,
               unit_id: dataIndicator.unit_id,
               goal: dataIndicator.goal,
-              id: res.data.indicator_id,
+              id: res.data.indicator_activity_id,
             });
             Swal.fire({
               title: "สำเร็จ",
@@ -1056,7 +1059,8 @@ export function ModalAddindicatorNew({
             });
           }
         } else {
-          const res = await EditIndicaton(
+          console.log(dataIndicator);
+          const res = await EditIndicatoractivity(
             token,
             dataIndicator.unit_id,
             dataIndicator.goal,
@@ -1070,7 +1074,7 @@ export function ModalAddindicatorNew({
               unit_name: dataIndicator.unit_name,
               unit_id: dataIndicator.unit_id,
               goal: dataIndicator.goal,
-              id: res.data.indicator_id,
+              id: res.data.indicator_activity_id,
             });
             Swal.fire({
               title: "สำเร็จ",

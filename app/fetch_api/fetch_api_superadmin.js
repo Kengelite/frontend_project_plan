@@ -274,7 +274,7 @@ export async function GetDataactionplanByidproject(
   try {
     // console.log("token : ", token);
     const response = await axios.post(
-      `${api}/api/v1/superadmin/activitybyidprojectAdmin?page=${page}&per_page=${per_page}`,
+      `${api}/api/v1/superadmin/activitybyidprojectadmin?page=${page}&per_page=${per_page}`,
       { id_project },
       {
         headers: {
@@ -516,6 +516,32 @@ export async function GetProject(token, project_id) {
     throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
   }
 }
+export async function GetActivity(token, activity_id) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.get(
+      `${api}/api/v1/superadmin/activity/${activity_id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
 export async function AddObjectiveNew(token, name_objective, id_project) {
   // console.log(id_project);
   try {
@@ -603,6 +629,95 @@ export async function DeleteObjective(token, objective_id) {
       error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
 
     throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+
+export async function AddObjectiveactivityNew(
+  token,
+  name_objective,
+  id_activity
+) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/objectiveactivity`,
+      {
+        name_objective,
+        id_activity,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function EditObjectiveactivity(
+  token,
+  activity_id,
+  name_objective
+) {
+  console.log(activity_id);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.put(
+      `${api}/api/v1/superadmin/objectiveactivity/${activity_id}`,
+      {
+        name_objective,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function DeleteObjectiveactivity(token, activity_id) {
+  console.log(activity_id);
+  try {
+    const response = await axios.delete(
+      `${api}/api/v1/superadmin/objectiveactivity/${activity_id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+    throw message;
   }
 }
 
@@ -695,9 +810,94 @@ export async function DeleteOkrproject(token, okr_project_id) {
     throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
   }
 }
+export async function AddOkractivityNew(token, id_okr, id_activity) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/okractivity`,
+      {
+        id_okr,
+        id_activity,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
 
-export async function AddprojectuserNew(token, id_user, id_project,type,id_year) {
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function EditOkractivity(token, okr_activity_id, id_okr) {
+  console.log(okr_activity_id);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.put(
+      `${api}/api/v1/superadmin/okractivity/${okr_activity_id}`,
+      {
+        id_okr,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function DeleteOkractivity(token, okr_activity_id) {
+  console.log(okr_activity_id);
+  try {
+    const response = await axios.delete(
+      `${api}/api/v1/superadmin/okractivity/${okr_activity_id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+    throw message;
+  }
+}
+
+export async function AddprojectuserNew(
+  token,
+  id_user,
+  id_project,
+  type,
+  id_year
+) {
   // console.log(id_project);
   try {
     // console.log("token : ", token);
@@ -707,7 +907,7 @@ export async function AddprojectuserNew(token, id_user, id_project,type,id_year)
         id_user,
         id_project,
         type,
-        id_year
+        id_year,
       },
       {
         headers: {
@@ -759,7 +959,7 @@ export async function Editprojectuser(token, user_project_id, id_user) {
     throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
   }
 }
-export async function Deleteprojectuser(token, user_project_id,type) {
+export async function Deleteprojectuser(token, user_project_id, type) {
   // console.log(okr_project_id);
   try {
     // console.log("token : ", token);
@@ -767,7 +967,7 @@ export async function Deleteprojectuser(token, user_project_id,type) {
       `${api}/api/v1/superadmin/deleteprojectuser`,
       {
         user_project_id,
-        type
+        type,
       },
       {
         headers: {
@@ -787,6 +987,354 @@ export async function Deleteprojectuser(token, user_project_id,type) {
       error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
 
     throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function GetEditProject(token, data) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.put(
+      `${api}/api/v1/superadmin/project/${data.project_id}`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data?.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+
+export async function GetEditActivity(token, data) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.put(
+      `${api}/api/v1/superadmin/activity/${data.activity_id}`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data?.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+
+export async function Deleteindicator(token, indicator_id) {
+  // console.log(okr_project_id);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/deleteindicatorproject`,
+      {
+        indicator_id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+
+export async function AddIndicatorNew(
+  token,
+  id_unit,
+  goal,
+  id_project,
+  indicator_name
+) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/addindicatorproject`,
+      {
+        data: {
+          id_unit,
+          goal,
+          indicator_name,
+        },
+        id_project,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function EditIndicaton(
+  token,
+  id_unit,
+  goal,
+  indicator_id,
+  indicator_name
+) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/editindicatorproject`,
+      {
+        id_unit,
+        goal,
+        indicator_id,
+        indicator_name,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+
+export async function AddIndicatoractivityNew(
+  token,
+  id_unit,
+  goal,
+  id_activity,
+  indicator_name
+) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/indicatoractivity`,
+      {
+        id_unit,
+        goal,
+        id_activity,
+        indicator_name,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function EditIndicatoractivity(
+  token,
+  id_unit,
+  goal,
+  id_activity,
+  indicator_name
+) {
+  console.log(id_activity);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.put(
+      `${api}/api/v1/superadmin/indicatoractivity/${id_activity}`,
+      {
+        id_unit,
+        goal,
+        indicator_name,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function DeleteIndicatoractivity(token, indicator_id) {
+  console.log(indicator_id);
+  try {
+    const response = await axios.delete(
+      `${api}/api/v1/superadmin/indicatoractivity/${indicator_id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+    throw message;
+  }
+}
+
+export async function AddactivityuserNew(
+  token,
+  id_user,
+  id_project,
+  type,
+  id_year
+) {
+  // console.log(id_project);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.post(
+      `${api}/api/v1/superadmin/useractivity`,
+      {
+        id_user,
+        id_project,
+        type,
+        id_year,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function Editactivityuser(token, user_project_id, id_user) {
+  console.log(user_project_id);
+  try {
+    // console.log("token : ", token);
+    const response = await axios.put(
+      `${api}/api/v1/superadmin/useractivity/${user_project_id}`, 
+      { id_user },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
+export async function Deleteactivityuser(token, user_project_id, type) {
+  try {
+    const response = await axios.delete(
+      `${api}/api/v1/superadmin/useractivity/${user_project_id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        data: { type },
+      }
+    );
+
+    return response.data ?? [];
+  } catch (error) {
+    console.error("Error deleting user activity:", error);
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะลบข้อมูล";
+    throw message;
   }
 }
 

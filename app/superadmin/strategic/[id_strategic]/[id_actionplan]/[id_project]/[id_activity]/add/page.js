@@ -431,7 +431,7 @@ export default function addActivtydetail({ params }) {
                             id="datepicker-range-start"
                             name="start"
                             type="date"
-                            className="xl:w-67 md:w-35 w-38  border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            className="xl:w-62 md:w-35 w-38  border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             placeholder="Select date start"
                             value={dataAddsend.start_date ?? ""}
                             onChange={(e) =>
@@ -466,7 +466,7 @@ export default function addActivtydetail({ params }) {
                             name="end"
                             type="date"
                             disabled={!dataAddsend.start_date}
-                            className={`xl:w-67 md:w-35 w-38 ${
+                            className={`xl:w-62 md:w-35 w-38 ${
                               !dataAddsend.start_date
                                 ? "bg-gray-100"
                                 : "bg-white"

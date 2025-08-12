@@ -88,7 +88,7 @@ export default function DatatableProject({
 
   const formatDate = (dateStr) => {
     const d = new Date(dateStr);
-    const buddhistYear = d.getFullYear() + 543;
+    const buddhistYear = d.getFullYear();
     const monthNames = [
       "ม.ค.",
       "ก.พ.",
@@ -1399,7 +1399,7 @@ export default function DatatableProject({
       ignoreRowClick: true,
     },
     {
-      name: "จัดการ",
+      name: "ดำเนินการ",
       cell: (row) => (
         <>
           <div style={{ padding: "5px" }}>

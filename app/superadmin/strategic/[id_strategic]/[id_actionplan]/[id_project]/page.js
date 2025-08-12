@@ -24,6 +24,7 @@ export default function HomeActivity({ params }) {
   const [isOpenModalAdd, setIsOpenModalAdd] = useState(false);
   const [Activity, setActivity] = useState({ id: "", name: "", budget: "" });
   const [Strategic, setStrategic] = useState({ id: "", name: "", budget: "" });
+  const [Project, setProject] = useState({ id: "", name: "", budget: "" });
   const [open, setOpen] = useState(false);
   const { id_strategic, id_actionplan, id_project } = use(params);
   const [totalRows, setTotalRows] = useState(0);
@@ -35,7 +36,7 @@ export default function HomeActivity({ params }) {
   const handleModalSelect = (type) => {
     // console.log(MaxBudget)
     if (type === "new") {
-      if (Activity.budget - MaxBudget <= 0) {
+      if (Activity.budget - MaxBudget < 0) {
         toggleModalAdd();
         Swal.fire({
           title: "เกิดข้อผิดพลาด",
@@ -76,15 +77,16 @@ export default function HomeActivity({ params }) {
 
   useEffect(() => {
     const data = sessionStorage.getItem("project_data");
+    const data_actionplan = sessionStorage.getItem("actionplan_data");
     const data_strategic = sessionStorage.getItem("strategic_data");
     // console.log(data)
-    if (!data || !data_strategic) {
+    if (!data || !data_strategic || !data_actionplan) {
       window.location.href = `/superadmin/strategic`;
     }
-    console.log(data);
-    console.log(data_strategic);
+
     if (data) {
-      setActivity(JSON.parse(data));
+      setActivity(JSON.parse(data_actionplan));
+      setProject(JSON.parse(data));
       setStrategic(JSON.parse(data_strategic));
     }
   }, []);
@@ -244,12 +246,13 @@ export default function HomeActivity({ params }) {
             <div>
               {Activity.id && Strategic.id && (
                 <DatatableActivity
-                  id_projectref={Activity.id}
+                  id_projectref={Project.id}
                   onTotalChange={setTotalRows}
                   val={{ id_strategic, id_actionplan, id_project }}
                   strategicName={Strategic.name}
                   onMaxBudgetChange={setMaxBudget}
                   actionplanName={Activity.name}
+                  projectName={Project.name}
                 />
               )}
             </div>

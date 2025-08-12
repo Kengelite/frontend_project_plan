@@ -2,17 +2,18 @@
 import Image from "next/image";
 import { useState, use, useEffect } from "react";
 import Link from "next/link";
-import Menu from "../../../../../component/nav_admin";
-import Header from "../../../../../component/header";
+import Menu from "../../../../../../component/nav_admin";
+import Header from "../../../../../../component/header";
 import Select from "react-select";
 import DataTable from "react-data-table-component";
 import { CKEditor, useCKEditorCloud } from "@ckeditor/ckeditor5-react";
 import { FiEdit2 } from "react-icons/fi";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import dynamic from "next/dynamic";
+import _ from "lodash";
 import Swal from "sweetalert2";
 // import CustomEditor from "../../../component/create_editor";
-const CustomEditor = dynamic(() => import("../../../../component/editor"), {
+const CustomEditor = dynamic(() => import("../../../../../component/editor"), {
   ssr: false,
 });
 import Cookies from "js-cookie";
@@ -26,29 +27,58 @@ import {
   GetDataemployeeUse,
   GetDataunitUse,
   GetDatastyleUse,
-  GetAddActivityNew,
-} from "../../../../../../fetch_api/fetch_api_superadmin";
+  GetEditActivity,
+  DeleteObjectiveactivity,
+  DeleteOkractivity,
+  GetActivity,
+  Deleteactivityuser,
+  DeleteIndicatoractivity,
+} from "../../../../../../../fetch_api/fetch_api_superadmin";
 import {
   ModalAddOkrNew,
   ModalAddObjectiveNew,
   ModalAddUserNew,
   ModalAddindicatorNew,
-} from "./component/modal";
+  ModalAddTeacherNew,
+} from "../component/modal";
 
 export default function addProject({ params }) {
   const searchParams = useSearchParams();
   const total = searchParams.get("total");
   const maxbudget = searchParams.get("maxbudget");
-  const [isOpenModalOKRAdd, setIsOpenModalOKRAdd] = useState(false);
-  const [isOpenModalObjectiveAdd, setIsOpenModalObjectiveAdd] = useState(false);
+  const [isOpenModalOKRAdd, setIsOpenModalOKRAdd] = useState({
+    isOpen: false,
+    type: null,
+    data: null,
+  });
+  const [isOpenModalindicatorAdd, setIsOpenModalindicatorAdd] = useState({
+    isOpen: false,
+    type: null,
+    data: null,
+  });
+  const [isOpenModalEmployeeAdd, setIsOpenModalEmployeeAdd] = useState({
+    isOpen: false,
+    type: null,
+    data: null,
+  });
+  const [isOpenModalTeacherAdd, setIsOpenModalTeacherAdd] = useState({
+    isOpen: false,
+    type: null,
+    data: null,
+  });
+  const [isOpenModalObjectiveAdd, setIsOpenModalObjectiveAdd] = useState({
+    isOpen: false,
+    type: null,
+    data: null,
+  });
   const [isOpenModalUserAdd, setIsOpenModalUserAdd] = useState(false);
-  const [isOpenModalindicatorAdd, setIsOpenModalindicatorAdd] = useState(false);
-  const { id_strategic, id_actionplan,id_project } = use(params);
+  // const [isOpenModalindicatorAdd, setIsOpenModalindicatorAdd] = useState();
+  const { id_strategic, id_actionplan, id_project } = use(params);
   const [overBudget, setOverBudget] = useState(false);
-  const [dataAddNewProject, setdataAddNewProject] = useState({
-    id_project: "",
-    activity_name: "",
-    id: total,
+  const [dataProject, setdataProject] = useState({
+    activity_id: "",
+    name_activity: "",
+    id: "",
     location: "",
     id_department: null,
     id_year: null,
@@ -58,15 +88,40 @@ export default function addProject({ params }) {
     budget: "",
     time_start: "",
     time_end: "",
-    style_activity_detail: [],
-    okr_detail_activity: [],
-    objective_activity: [],
+    activity_style_detail: [],
+    okr_detail_project: [],
+    objective: [],
     employee: [],
     teacher: [],
-    indicator_activity: [],
+    indicator: [],
     abstract: "",
     obstacle: "",
     result: "",
+    id_project: "",
+  });
+  const [olddataProject, setolddataProject] = useState({
+    activity_id: "",
+    name_activity: "",
+    id: "",
+    location: "",
+    id_department: null,
+    id_year: null,
+    id_strategic: null,
+    id_actionplan: null,
+    activity_principle: [],
+    budget: "",
+    time_start: "",
+    time_end: "",
+    activity_style_detail: [],
+    okr_detail_project: [],
+    objective: [],
+    employee: [],
+    teacher: [],
+    indicator: [],
+    abstract: "",
+    obstacle: "",
+    result: "",
+    id_project: "",
   });
 
   const [isMounted, setIsMounted] = useState(false);
@@ -74,43 +129,153 @@ export default function addProject({ params }) {
   // สำหรับโค้ดที่ต้องรอให้โหลดในเบราว์เซอร์ก่อน
 
   useEffect(() => {
-    const saved = Cookies.get("dataAddNewActivity");
-
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        console.log(parsed);
-        setdataAddNewProject((prev) => ({
-          ...prev,
-          ...parsed, // รวมค่าเดิม + จาก cookie
-        }));
-      } catch (e) {
-        console.error("ไม่สามารถแปลงข้อมูลจาก Cookie ได้", e);
+    // const saved = Cookies.get("dataProject");
+    async function fetchData() {
+      const data_actionplan = sessionStorage.getItem("actionplan_data");
+      const data_strategic = sessionStorage.getItem("strategic_data");
+      const data_activity = sessionStorage.getItem("activity_edit");
+      const data_project = sessionStorage.getItem("project_data");
+      if (
+        !data_actionplan ||
+        !data_activity ||
+        !data_strategic ||
+        !data_project
+      ) {
+        window.location.href = `/superadmin/strategic`;
+        return;
       }
+
+      const parsed_actionplan = JSON.parse(data_actionplan);
+      const parsed_strategic = JSON.parse(data_strategic);
+      setActionplan(JSON.parse(data_actionplan));
+      setproject(JSON.parse(data_project));
+      const par_project = JSON.parse(data_activity);
+      console.log(par_project);
+      const token = Cookies.get("token");
+      const res = await GetActivity(token, par_project.data.activity_id);
+      console.log(res);
+      if (res.status == 200 && res.data.length > 0) {
+        const res_data = res.data[0];
+        const object_map = res_data.objective_activity.map((item) => ({
+          id: item.objective_activity_id,
+          name: item.objective_activity_name,
+        }));
+        const okr_map = res_data.activity_okr.map((item) => ({
+          okr_detail_activity_id: item.okr_detail_activity_id,
+          id: item.okr.okr_id,
+          name: `${item.okr.okr_number} ${item.okr.okr_name}`,
+        }));
+        const principle_map = res_data.activity_principle.map(
+          (item) => item.id_principle
+        );
+        const style_map = res_data.activity_style.map((item) => item.id_style);
+        console.log(style_map);
+        const emp_map = res_data.activity_users
+          .filter((item) => item.user?.academic_position === "2")
+          .map((item) => ({
+            id: item.user.id,
+            id_activity_user: item.id_activity_user,
+            name: `${item.user.name}`,
+            position: `${item.user?.position?.position_name || "-"} `,
+          }));
+
+        const teacher_map = res_data.activity_users
+          .filter((item) => item.user?.academic_position === "1")
+          .map((item) => ({
+            id: item.user.id,
+            name: item.user.name,
+            id_activity_user: item.id_activity_user,
+            position: item.user.position?.position_name || "-",
+          }));
+
+        const indicator_map = res_data.activity_indicator.map((item) => ({
+          id: item.indicator_activity_id,
+          indicator_name: item.indicator_name,
+          goal: item.goal,
+          unit_name: {
+            value: item.unit.unit_id,
+            label: item.unit.unit_name,
+          },
+        }));
+
+        // console.log(principle_map);
+        setdataProject((prev) => ({
+          ...prev,
+          activity_id: par_project.data.activity_id,
+          name_activity: res_data.name_activity,
+          id: res_data.id.toString(),
+          location: res_data.location,
+          budget: res_data.budget,
+          time_start: res_data.time_start,
+          time_end: res_data.time_end,
+          id_actionplan: parsed_actionplan.id,
+          id_strategic: parsed_strategic.id,
+          abstract: res_data.abstract,
+          id_department: res_data.id_department,
+          result: res_data.result,
+          obstacle: res_data.obstacle,
+          id_year: res_data.id_year,
+          objective: object_map,
+          activity_principle: principle_map,
+          activity_style_detail: style_map,
+          okr_detail_project: okr_map,
+          employee: emp_map,
+          teacher: teacher_map,
+          indicator: indicator_map,
+          id_project: res_data.id_project,
+        }));
+        setolddataProject((prev) => ({
+          ...prev,
+          activity_id: par_project.data.activity_id,
+          name_activity: res_data.name_activity,
+          id: res_data.id.toString(),
+          location: res_data.location,
+          budget: res_data.budget,
+          time_start: res_data.time_start,
+          time_end: res_data.time_end,
+          id_actionplan: parsed_actionplan.id,
+          id_strategic: parsed_strategic.id,
+          abstract: res_data.abstract,
+          id_department: res_data.id_department,
+          result: res_data.result,
+          obstacle: res_data.obstacle,
+          id_year: res_data.id_year,
+          objective: object_map,
+          activity_principle: principle_map,
+          activity_style_detail: style_map,
+          okr_detail_project: okr_map,
+          employee: emp_map,
+          teacher: teacher_map,
+          indicator: indicator_map,
+          id_project: res_data.id_project,
+        }));
+      }
+
+      setIsMounted(true); // ตั้งค่าเป็น true เมื่อคอมโพเนนต์ถูก mount แล้วบน client
     }
-    setIsMounted(true); // ตั้งค่าเป็น true เมื่อคอมโพเนนต์ถูก mount แล้วบน client
+    fetchData();
   }, []);
 
-  useEffect(() => {
-    console.log(dataAddNewProject);
-    const handleSaveToCookie = () => {
-      Cookies.set("dataAddNewActivity", JSON.stringify(dataAddNewProject), {
-        expires: 7,
-        path: "/",
-      });
-    };
+  // useEffect(() => {
+  //   console.log(dataProject);
+  //   const handleSaveToCookie = () => {
+  //     Cookies.set("dataProject", JSON.stringify(dataProject), {
+  //       expires: 7,
+  //       path: "/",
+  //     });
+  //   };
 
-    // 1. บันทึกตอนก่อนออกจากหน้า (รวมกด refresh, ปิดแท็บ)
-    window.addEventListener("beforeunload", handleSaveToCookie);
+  //   // 1. บันทึกตอนก่อนออกจากหน้า (รวมกด refresh, ปิดแท็บ)
+  //   window.addEventListener("beforeunload", handleSaveToCookie);
 
-    // 2. บันทึกตอนผู้ใช้กด back/forward (popstate)
-    window.addEventListener("popstate", handleSaveToCookie);
+  //   // 2. บันทึกตอนผู้ใช้กด back/forward (popstate)
+  //   window.addEventListener("popstate", handleSaveToCookie);
 
-    return () => {
-      window.removeEventListener("beforeunload", handleSaveToCookie);
-      window.removeEventListener("popstate", handleSaveToCookie);
-    };
-  }, [dataAddNewProject]);
+  //   return () => {
+  //     window.removeEventListener("beforeunload", handleSaveToCookie);
+  //     window.removeEventListener("popstate", handleSaveToCookie);
+  //   };
+  // }, [dataProject]);
 
   const [strategic, setStrategic] = useState({
     id: "",
@@ -130,7 +295,7 @@ export default function addProject({ params }) {
     end_date: null,
   });
 
-  const [project, setProject] = useState({
+  const [project, setproject] = useState({
     id: "",
     name: "",
     budget: "",
@@ -142,7 +307,7 @@ export default function addProject({ params }) {
 
   useEffect(() => {
     if (strategic && strategic.year_id) {
-      setdataAddNewProject((prev) => ({
+      setdataProject((prev) => ({
         ...prev,
         id_year: strategic.year_id,
         time_start: `${strategic.year - 1}-10-01`,
@@ -152,31 +317,18 @@ export default function addProject({ params }) {
   }, [strategic]);
   useEffect(() => {
     async function fetchStrategicData() {
-      const data = sessionStorage.getItem("strategic_data");
-      const data_actionplan = sessionStorage.getItem("actionplan_data");
-      const data_project = sessionStorage.getItem("project_data");
-      if (!data || !data_actionplan || !data_project) {
-        window.location.href = `/superadmin/strategic`;
-        return;
-      }
-
-      const parsed = JSON.parse(data);
-      setStrategic(JSON.parse(data)); // set state
-      const parsed_actionplan = JSON.parse(data_actionplan);
-      const parsed_project = JSON.parse(data_project);
-      setActionplan(JSON.parse(data_actionplan));
-      console.log(data_project);
-      setProject(JSON.parse(data_project));
       // console.log(parsed);
       // console.log(parsed_actionplan);
-      setdataAddNewProject((prev) => ({
-        ...prev,
-        id_actionplan: parsed_actionplan.id,
-        id_strategic: parsed.id,
-        id_project: parsed_project.id,
-        id:  total,
-      }));
+      // setdataProject((prev) => ({
+      //   ...prev,
+      //   id_actionplan: parsed_actionplan.id,
+      //   id_strategic: parsed.id,
+      //   id: "P" + total,
+      // }));
       try {
+        const data = sessionStorage.getItem("strategic_data");
+        const parsed = JSON.parse(data);
+        setStrategic(JSON.parse(data)); // set state
         const token = Cookies.get("token"); // อย่าลืมดึง token ด้วย
         const res_strategic = await GetDatastrategicForAdd(
           token,
@@ -204,11 +356,8 @@ export default function addProject({ params }) {
     fetchStrategicData();
   }, []);
 
-  const [optionsOkr, setoptionsOkr] = useState([
-    // { value: "1", label: "2567" },
-    // { value: "2", label: "2568" },
-    // { value: "3", label: "2569" },
-  ]);
+  const [optionsOkr, setoptionsOkr] = useState([]);
+  // const [optionsUnit, setoptionsOkr] = useState([]);
   useEffect(() => {
     async function fetchData() {
       try {
@@ -233,7 +382,7 @@ export default function addProject({ params }) {
         const mappedemployeeOptions = res_employee.map((item) => ({
           value: item.id,
           label: `${item.name}  `,
-          position: item.position?.position_name,
+          position: item.position?.position_name || "-",
         }));
         setoptionsemployee(mappedemployeeOptions);
 
@@ -242,7 +391,7 @@ export default function addProject({ params }) {
         const mappedteacherOptions = res_teacher.map((item) => ({
           value: item.id,
           label: `${item.name}  `,
-          position: item.position?.position_name,
+          position: item.position?.position_name || "-",
         }));
         setoptionsteacher(mappedteacherOptions);
 
@@ -270,45 +419,13 @@ export default function addProject({ params }) {
   }, []);
 
   // const [selecteddeparment, setSelecteddeparment] = useState(null);
-  const [optionsDeparment, setOptionsDeparment] = useState([
-    // { value: "D1", label: "IT" },
-    // { value: "D2", label: "AI" },
-    // { value: "D3", label: "CS" },
-  ]);
+  const [optionsDeparment, setOptionsDeparment] = useState([]);
 
-  const [optionsUnit, setOptionsUnit] = useState([
-    // { value: "D1", label: "IT" },
-    // { value: "D2", label: "AI" },
-    // { value: "D3", label: "CS" },
-  ]);
+  const [optionsUnit, setOptionsUnit] = useState([]);
 
-  const [optionsStrategic, setoptionsStrategic] = useState([
-    // { value: "S1", label: "S1 : ยุทธศาสตร์ด้านการจัดการศึกษา" },
-    // { value: "S2", label: "S2 : ยุทธศาสตร์ด้านการวิจัย" },
-    // {
-    //   value: "S3",
-    //   label: "S3 : ยุทธศาสตร์ด้านการบริการวิชาการเพื่อสร้างประโยชน์ให้สังคม",
-    // },
-  ]);
+  const [optionsStrategic, setoptionsStrategic] = useState([]);
 
-  const [optionsprinciples, setoptionsprinciples] = useState([
-    // {
-    //   value: "PP1",
-    //   label: "A1 : การพัฒนาหลักสูตรใหม่ ",
-    // },
-    // {
-    //   value: "PP2",
-    //   label: "A2 : การพัฒนา",
-    // },
-    // {
-    //   value: "PP3",
-    //   label: "A3 : การจัดการ",
-    // },
-    // {
-    //   value: "PP4",
-    //   label: "A4 : การจัดการศึกษา)",
-    // },
-  ]);
+  const [optionsprinciples, setoptionsprinciples] = useState([]);
 
   const [optionstype, setoptionstype] = useState([
     // {
@@ -353,10 +470,61 @@ export default function addProject({ params }) {
       color: "#9ca3af", // สีของ placeholder
     }),
   };
+
+  const deleted_indicator = async (row, type) => {
+    console.log(row);
+    try {
+      if (dataProject.indicator.length == 1) {
+        Swal.fire({
+          title: "ไม่สามารถลบได้ ",
+          text: `ไม่สามารถลบได้เนื่องจากเป็นลำดับสุดท้ายของข้อมูล`,
+          icon: "warning",
+          confirmButtonText: "ตกลง",
+        });
+        return;
+      }
+      Swal.fire({
+        title: `การลบข้อมูล ${row.indicator_name}`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "บันทึก",
+        cancelButtonText: "ยกเลิก",
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const token = Cookies.get("token");
+          const res = await DeleteIndicatoractivity(token, row.id);
+
+          if (res?.status === 200) {
+            Swal.fire({
+              title: "สำเร็จ",
+              text: `ลบ ${row.indicator_name}`,
+              icon: "success",
+              confirmButtonText: "ตกลง",
+            });
+            setdataProject((prev) => ({
+              ...prev,
+              indicator: prev.indicator.filter((item) => item.id !== row.id),
+            }));
+          } else {
+            Swal.fire({
+              title: "เกิดข้อผิดพลาด",
+              text: "กรุณาลองใหม่อีกครั้ง",
+              icon: "error",
+              confirmButtonText: "ตกลง",
+            });
+          }
+        }
+      });
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการลบ:", error);
+    }
+  };
   const columns = [
     {
       name: "ลำดับ",
-      selector: (row) => row.id,
+      selector: (row, index) => index + 1,
       sortable: true,
     },
     {
@@ -384,17 +552,24 @@ export default function addProject({ params }) {
       cell: (row) => (
         <>
           <div style={{ padding: "5px" }}>
+            <button
+              className="rounded border-gray-200 p-2 hover:bg-gray-100 group"
+              onClick={() =>
+                setIsOpenModalindicatorAdd({
+                  isOpen: true,
+                  type: 2,
+                  data: row,
+                })
+              }
+            >
+              <FiEdit2 className="text-xl text-gray-500 group-hover:text-black" />
+            </button>
+          </div>
+          <div style={{ padding: "5px" }}>
             {" "}
             <button
               className="rounded border-gray-200 p-2 hover:bg-gray-100  group"
-              onClick={() =>
-                setdataAddNewProject((prev) => ({
-                  ...prev,
-                  indicator_activity: prev.indicator_activity.filter(
-                    (item) => item.id !== row.id
-                  ),
-                }))
-              }
+              onClick={() => deleted_indicator(row)}
             >
               <i className="bi bi-trash text-xl group-hover:text-red-500"></i>{" "}
             </button>
@@ -405,6 +580,61 @@ export default function addProject({ params }) {
     },
   ];
 
+  const deleted_okr = async (row) => {
+    console.log(row);
+    try {
+      if (dataProject.okr_detail_project.length == 1) {
+        Swal.fire({
+          title: "ไม่สามารถลบได้ ",
+          text: `ไม่สามารถลบได้เนื่องจากเป็นลำดับสุดท้ายของข้อมูล`,
+          icon: "warning",
+          confirmButtonText: "ตกลง",
+        });
+        return;
+      }
+      Swal.fire({
+        title: `การลบข้อมูล ${row.name}`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "บันทึก",
+        cancelButtonText: "ยกเลิก",
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const token = Cookies.get("token");
+          const res = await DeleteOkractivity(
+            token,
+            row.okr_detail_activity_id
+          );
+
+          if (res?.status === 200) {
+            Swal.fire({
+              title: "สำเร็จ",
+              text: `ลบ ${row.name}`,
+              icon: "success",
+              confirmButtonText: "ตกลง",
+            });
+            setdataProject((prev) => ({
+              ...prev,
+              okr_detail_project: prev.okr_detail_project.filter(
+                (item) => item.id !== row.id
+              ),
+            }));
+          } else {
+            Swal.fire({
+              title: "เกิดข้อผิดพลาด",
+              text: "กรุณาลองใหม่อีกครั้ง",
+              icon: "error",
+              confirmButtonText: "ตกลง",
+            });
+          }
+        }
+      });
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการลบ:", error);
+    }
+  };
   const columns_okr = [
     {
       name: "ข้อ",
@@ -423,17 +653,24 @@ export default function addProject({ params }) {
       cell: (row) => (
         <>
           <div style={{ padding: "5px" }}>
+            <button
+              className="rounded border-gray-200 p-2 hover:bg-gray-100 group"
+              onClick={() =>
+                setIsOpenModalOKRAdd({
+                  isOpen: true,
+                  type: 2,
+                  data: row,
+                })
+              }
+            >
+              <FiEdit2 className="text-xl text-gray-500 group-hover:text-black" />
+            </button>
+          </div>
+          <div style={{ padding: "5px" }}>
             {" "}
             <button
               className="rounded border-gray-200 p-2 hover:bg-gray-100  group"
-              onClick={() =>
-                setdataAddNewProject((prev) => ({
-                  ...prev,
-                  okr_detail_activity: prev.okr_detail_activity.filter(
-                    (item) => item.id !== row.id
-                  ),
-                }))
-              } // เรียกใช้ฟังก์ชัน handleDelete เมื่อกดปุ่ม
+              onClick={() => deleted_okr(row)}
             >
               <i className="bi bi-trash text-xl group-hover:text-red-500"></i>{" "}
             </button>
@@ -443,6 +680,56 @@ export default function addProject({ params }) {
       ignoreRowClick: true,
     },
   ];
+
+  const deleted_objective = async (row) => {
+    try {
+      if (dataProject.objective.length == 1) {
+        Swal.fire({
+          title: "ไม่สามารถลบได้ ",
+          text: `ไม่สามารถลบได้เนื่องจากเป็นลำดับสุดท้ายของข้อมูล`,
+          icon: "warning",
+          confirmButtonText: "ตกลง",
+        });
+        return;
+      }
+      Swal.fire({
+        title: `การลบข้อมูล ${row.name}`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "บันทึก",
+        cancelButtonText: "ยกเลิก",
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const token = Cookies.get("token");
+          const res = await DeleteObjectiveactivity(token, row.id);
+
+          if (res?.status === 200) {
+            Swal.fire({
+              title: "สำเร็จ",
+              text: `ลบวัตถุประสงค์ ${row.name}`,
+              icon: "success",
+              confirmButtonText: "ตกลง",
+            });
+            setdataProject((prev) => ({
+              ...prev,
+              objective: prev.objective.filter((item) => item.id !== row.id),
+            }));
+          } else {
+            Swal.fire({
+              title: "เกิดข้อผิดพลาด",
+              text: "กรุณาลองใหม่อีกครั้ง",
+              icon: "error",
+              confirmButtonText: "ตกลง",
+            });
+          }
+        }
+      });
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการลบ:", error);
+    }
+  };
   const columns_objective = [
     {
       name: "ข้อ",
@@ -461,17 +748,32 @@ export default function addProject({ params }) {
       cell: (row) => (
         <>
           <div style={{ padding: "5px" }}>
+            <button
+              className="rounded border-gray-200 p-2 hover:bg-gray-100 group"
+              onClick={() =>
+                setIsOpenModalObjectiveAdd({
+                  isOpen: true,
+                  type: 2,
+                  data: row,
+                })
+              }
+            >
+              <FiEdit2 className="text-xl text-gray-500 group-hover:text-black" />
+            </button>
+          </div>
+          <div style={{ padding: "5px" }}>
             {" "}
             <button
               className="rounded border-gray-200 p-2 hover:bg-gray-100  group"
-              onClick={() =>
-                setdataAddNewProject((prev) => ({
-                  ...prev,
-                  objective_activity: prev.objective_activity.filter(
-                    (item) => item.id !== row.id
-                  ),
-                }))
-              } // เรียกใช้ฟังก์ชัน handleDelete เมื่อกดปุ่ม
+              onClick={() => deleted_objective(row)}
+
+              //   setdataProject((prev) => ({
+              //     ...prev,
+              //     objective: prev.objective.filter(
+              //       (item) => item.id !== row.id
+              //     ),
+              //   }))
+              // }
             >
               <i className="bi bi-trash text-xl group-hover:text-red-500"></i>{" "}
             </button>
@@ -482,6 +784,76 @@ export default function addProject({ params }) {
     },
   ];
 
+  const deleted_projectuser = async (row, type) => {
+    console.log(row);
+    try {
+      if (dataProject.employee.length == 1 && type == 1) {
+        Swal.fire({
+          title: "ไม่สามารถลบได้ ",
+          text: `ไม่สามารถลบได้เนื่องจากเป็นลำดับสุดท้ายของข้อมูล`,
+          icon: "warning",
+          confirmButtonText: "ตกลง",
+        });
+        return;
+      } else if (dataProject.teacher.length == 1 && type == 2) {
+        Swal.fire({
+          title: "ไม่สามารถลบได้ ",
+          text: `ไม่สามารถลบได้เนื่องจากเป็นลำดับสุดท้ายของข้อมูล`,
+          icon: "warning",
+          confirmButtonText: "ตกลง",
+        });
+        return;
+      }
+      Swal.fire({
+        title: `การลบข้อมูล ${row.name}`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "บันทึก",
+        cancelButtonText: "ยกเลิก",
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+      }).then(async (result) => {
+        console.log(row);
+        if (result.isConfirmed) {
+          const token = Cookies.get("token");
+          const res = await Deleteactivityuser(
+            token,
+            row.id_activity_user,
+            type
+          );
+
+          if (res?.status === 200) {
+            Swal.fire({
+              title: "สำเร็จ",
+              text: `ลบ ${row.name}`,
+              icon: "success",
+              confirmButtonText: "ตกลง",
+            });
+            if (type == 1) {
+              setdataProject((prev) => ({
+                ...prev,
+                employee: prev.employee.filter((item) => item.id !== row.id),
+              }));
+            } else {
+              setdataProject((prev) => ({
+                ...prev,
+                teacher: prev.teacher.filter((item) => item.id !== row.id),
+              }));
+            }
+          } else {
+            Swal.fire({
+              title: "เกิดข้อผิดพลาด",
+              text: "กรุณาลองใหม่อีกครั้ง",
+              icon: "error",
+              confirmButtonText: "ตกลง",
+            });
+          }
+        }
+      });
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการลบ:", error);
+    }
+  };
   const columns_useremployee = [
     {
       name: "ลำดับ",
@@ -506,15 +878,25 @@ export default function addProject({ params }) {
       cell: (row) => (
         <>
           <div style={{ padding: "5px" }}>
+            <button
+              className="rounded border-gray-200 p-2 hover:bg-gray-100 group"
+              onClick={() => {
+                setIsOpenModalEmployeeAdd({
+                  isOpen: true,
+                  type: 2,
+                  data: row,
+                });
+                console.log(row);
+              }}
+            >
+              <FiEdit2 className="text-xl text-gray-500 group-hover:text-black" />
+            </button>
+          </div>
+          <div style={{ padding: "5px" }}>
             {" "}
             <button
               className="rounded border-gray-200 p-2 hover:bg-gray-100  group"
-              onClick={() =>
-                setdataAddNewProject((prev) => ({
-                  ...prev,
-                  employee: prev.employee.filter((item) => item.id !== row.id),
-                }))
-              } // เรียกใช้ฟังก์ชัน handleDelete เมื่อกดปุ่ม
+              onClick={() => deleted_projectuser(row, 1)}
             >
               <i className="bi bi-trash text-xl group-hover:text-red-500"></i>{" "}
             </button>
@@ -548,15 +930,25 @@ export default function addProject({ params }) {
       cell: (row) => (
         <>
           <div style={{ padding: "5px" }}>
+            <button
+              className="rounded border-gray-200 p-2 hover:bg-gray-100 group"
+              onClick={() => {
+                setIsOpenModalTeacherAdd({
+                  isOpen: true,
+                  type: 2,
+                  data: row,
+                });
+                console.log(row);
+              }}
+            >
+              <FiEdit2 className="text-xl text-gray-500 group-hover:text-black" />
+            </button>
+          </div>
+          <div style={{ padding: "5px" }}>
             {" "}
             <button
               className="rounded border-gray-200 p-2 hover:bg-gray-100  group"
-              onClick={() =>
-                setdataAddNewProject((prev) => ({
-                  ...prev,
-                  teacher: prev.teacher.filter((item) => item.id !== row.id),
-                }))
-              } // เรียกใช้ฟังก์ชัน handleDelete เมื่อกดปุ่ม
+              onClick={() => deleted_projectuser(row, 2)}
             >
               <i className="bi bi-trash text-xl group-hover:text-red-500"></i>{" "}
             </button>
@@ -584,39 +976,60 @@ export default function addProject({ params }) {
     setEditorData(data);
   };
 
-  const handleAddproject = async (row) => {
+  const handleEditactivity = async (row) => {
     // const newStatus = row.status === 1 ? 0 : 1;
-
+    console.log(row);
     const isEmpty = (value) => {
       if (Array.isArray(value)) return value.length === 0;
       return value === null || value === "";
     };
+    if (
+      row.name_activity === olddataProject.name_activity &&
+      row.id === olddataProject.id &&
+      row.id_department === olddataProject.id_department &&
+      row.abstract === olddataProject.abstract &&
+      row.result === olddataProject.result &&
+      row.obstacle === olddataProject.obstacle &&
+      JSON.stringify(row.activity_style_detail) ===
+        JSON.stringify(olddataProject.activity_style_detail) &&
+      JSON.stringify(row.activity_principle) ===
+        JSON.stringify(olddataProject.activity_principle) &&
+      row.location === olddataProject.location
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "ยังไม่มีการแก้ไขข้อมูล",
+      });
+      return;
+    }
+    const ignoreFields = [
+      "id_project",
+      "result",
+      "indicator",
+      "teacher",
+      "employee",
+      "objective",
+      "okr_detail_project",
+    ];
 
-    const ignoreFields = ["id_project", "result"];
-
-    const emptyFields = Object.entries(dataAddNewProject)
+    const emptyFields = Object.entries(dataProject)
       .filter(([key]) => !ignoreFields.includes(key))
       .filter(([_, value]) => isEmpty(value))
       .map(([key]) => key); // ได้ชื่อฟิลด์ที่ว่าง
 
     const fieldLabels = {
-      activity_name: "ชื่อกิจกรรม",
+      name_activity: "ชื่อกิจกรรม",
       id: "รหัสกิจกรรม",
       location: "สถานที่ดำเนินการ",
       id_department: "หน่วยงานที่รับผิดชอบ",
       year: "ปีงบประมาณ",
       id_strategic: "ยุทธศาสตร์",
-      id_actionplan: "แผนปฏิบัติการ",
+      id_actionplan: "กลยุทธ์",
       activity_principle: "หลักการและเหตุผล",
       budget: "งบประมาณ",
       time_start: "วันเริ่มต้น",
       time_end: "วันสิ้นสุด",
-      style_activity_detail: "ลักษณะกิจกรรม",
-      okr_detail_activity: "OKR",
-      objective_activity: "วัตถุประสงค์",
-      employee: "เจ้าหน้าที่ผู้รับผิดชอบ",
-      teacher: "อาจารย์ผุ้รับผิดชอบ",
-      indicator_activity: "ตัวชี้วัด",
+      activity_style_detail: "ลักษณะกิจกรรม",
       abstract: "บทคัดย่อ",
       obstacle: "อุปสรรค",
     };
@@ -644,7 +1057,7 @@ export default function addProject({ params }) {
     // }
     const result = await Swal.fire({
       title: "คุณแน่ใจหรือไม่ ?",
-      text: `คุณต้องการเพิ่ม "${row.activity_name}" หรือไม่`,
+      text: `คุณต้องการเพิ่ม "${row.name_activity}" หรือไม่`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -655,9 +1068,8 @@ export default function addProject({ params }) {
 
     if (result.isConfirmed) {
       try {
-        console.log(row)
         const token = Cookies.get("token");
-        const response = await GetAddActivityNew(token, row);
+        const response = await GetEditActivity(token, row);
         // if(response)
         console.log(response);
         if (response) {
@@ -676,8 +1088,8 @@ export default function addProject({ params }) {
             icon: "success",
             confirmButtonText: "ตกลง",
           }).then(() => {
-            Cookies.remove("dataAddNewActivity", { path: "/" });
-            window.history.back();
+            // Cookies.remove("dataProject", { path: "/" });
+            window.location.reload();
           });
         } else {
           Swal.fire({
@@ -690,7 +1102,7 @@ export default function addProject({ params }) {
       } catch (err) {
         Swal.fire({
           title: "เกิดข้อผิดพลาด",
-          text: `ไม่สามารถเพิ่มข้อมูลเนื่องจาก ${err} กรุณาลองใหม่อีกครั้ง`,
+          text: `ไม่สามารถเพิ่มข้อมูล ${err} กรุณาลองใหม่อีกครั้ง`,
           icon: "error",
           confirmButtonText: "ตกลง",
         });
@@ -709,7 +1121,7 @@ export default function addProject({ params }) {
             <div className="bg-gray-100  xl:col-span-2 hidden md:block md:col-span-3 pt-4 ps-3">
               <Menu />
             </div>
-            <div className="col-span-12 xl:col-span-10  md:col-span-9 mt-5 ms-4 md:mt-3 me-4 md:me-6 border border-gray-300 rounded-lg  ">
+            <div className="col-span-12 xl:col-span-10  md:col-span-9 mt-5 ms-4 md:mt-3 me-4 mb-8 pb-8 md:me-6 border border-gray-300 rounded-lg shadow-xl">
               <div className="flex flex-row items-center justify-between py-4 px-8">
                 <div className="text-lg md:text-3xl">
                   แบบฟอร์มกิจกรรมตามแผนปฏิบัติการ วิทยาลัยการคอมพิวเตอร์
@@ -717,7 +1129,7 @@ export default function addProject({ params }) {
                 </div>
               </div>
               <hr className="w-full border-gray-300" />
-              <div className="grid grid-cols-12 gap-x-8 gap-y-6 mt-3 py-4 px-8">
+              <div className="grid grid-cols-12 gap-x-8 gap-y-6 mt-3 px-4 md:px-8">
                 <div className="col-span-12 md:col-span-6">
                   <span className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                     ชื่อกิจกรรม <span className="text-red-600">*</span>
@@ -728,18 +1140,18 @@ export default function addProject({ params }) {
                     className="bg-gray-50  shadow-md border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     placeholder="กรุณากรอกชื่อกิจกรรม"
                     required
-                    value={dataAddNewProject.activity_name || ""}
+                    value={dataProject.name_activity || ""}
                     onChange={(e) =>
-                      setdataAddNewProject((prev) => ({
+                      setdataProject((prev) => ({
                         ...prev,
-                        activity_name: e.target.value,
+                        name_activity: e.target.value,
                       }))
                     }
                   />
                 </div>
                 <div className="col-span-12 md:col-span-6">
                   <span className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    รหัสกิจกรรม
+                    รหัสกิจกรรม <span className="text-red-600">*</span>
                   </span>
                   <input
                     type="text"
@@ -747,7 +1159,7 @@ export default function addProject({ params }) {
                     className="bg-gray-50  shadow-md border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     placeholder="กรุณากรอกรหัสกิจกรรม"
                     readOnly
-                    value={"A"+dataAddNewProject.id}
+                    value={`${id_project}-${dataProject.id}` || ""}
                   />
                 </div>
                 <div className="col-span-12 md:col-span-6">
@@ -759,9 +1171,9 @@ export default function addProject({ params }) {
                     id="location"
                     className="bg-gray-50  shadow-md border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     placeholder="กรุณากรอกสถานที่"
-                    value={dataAddNewProject.location || ""}
+                    value={dataProject.location || ""}
                     onChange={(e) =>
-                      setdataAddNewProject((prev) => ({
+                      setdataProject((prev) => ({
                         ...prev,
                         location: e.target.value,
                       }))
@@ -778,10 +1190,8 @@ export default function addProject({ params }) {
                     className="bg-gray-50  shadow-md border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     placeholder="กรุณากรอกงบประมาณ"
                     value={
-                      dataAddNewProject.budget
-                        ? Number(dataAddNewProject.budget).toLocaleString(
-                            "th-TH"
-                          )
+                      dataProject.budget
+                        ? Number(dataProject.budget).toLocaleString("th-TH")
                         : ""
                     }
                     onChange={(e) => {
@@ -795,8 +1205,8 @@ export default function addProject({ params }) {
                       }
                       if (!isNaN(rawValue)) {
                         if (rawValue <= maxBalace) {
-                          setdataAddNewProject({
-                            ...dataAddNewProject,
+                          setdataProject({
+                            ...dataProject,
                             budget: rawValue,
                           });
                         }
@@ -805,19 +1215,20 @@ export default function addProject({ params }) {
                   />
                   {overBudget && (
                     <p className="mt-1 text-sm text-red-600">
-                      งบประมาณไม่ควรเกิน {maxbudget} บาท
+                      งบประมาณไม่ควรเกิน {maxbudget} บาท{" "}
+                      <span className="text-red-600">*</span>
                     </p>
                   )}
                 </div>
                 <div className="col-span-12 md:col-span-6">
                   <span className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    ระยะเวลาดำเนินการ
+                    ระยะเวลาดำเนินการ <span className="text-red-600">*</span>
                   </span>
                   <div className="flex flex-row">
                     <div
                       id="date-range-picker"
                       date-rangepicker="true"
-                      className="flex items-center"
+                      className="flex items-center justify-between"
                     >
                       <div className="relative">
                         <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -835,9 +1246,9 @@ export default function addProject({ params }) {
                           id="datepicker-range-start"
                           name="start"
                           type="date"
-                          className="bg-gray-50  xl:w-64 md:w-38 w-38 shadow-md border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                          className="bg-gray-50  xl:w-67 md:w-38 w-34 shadow-md border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                           placeholder="Select date start"
-                          value={dataAddNewProject.time_start}
+                          value={dataProject.time_start || ""}
                           readOnly
                         />
                       </div>
@@ -858,9 +1269,9 @@ export default function addProject({ params }) {
                           id="datepicker-range-end"
                           name="end"
                           type="date"
-                          className="bg-gray-50  xl:w-64 md:w-38 w-38 shadow-md border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                          className="bg-gray-50  xl:w-67 md:w-38 w-34 shadow-md border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                           placeholder="Select date end"
-                          value={dataAddNewProject.time_end}
+                          value={dataProject.time_end || ""}
                           readOnly
                         />
                       </div>
@@ -878,13 +1289,13 @@ export default function addProject({ params }) {
                   <Select
                     id="deparment"
                     value={optionsDeparment.find(
-                      (option) => option.value === dataAddNewProject.deparment
+                      (option) => option.value === dataProject.id_department
                     )}
-                    // value={dataAddNewProject.deparment || ""}
+                    // value={dataProject.deparment || ""}
                     onChange={(e) => {
                       console.log("Selected Value:", e.value);
-                      setdataAddNewProject({
-                        ...dataAddNewProject,
+                      setdataProject({
+                        ...dataProject,
                         id_department: e.value,
                       });
                     }}
@@ -900,7 +1311,7 @@ export default function addProject({ params }) {
                     htmlFor="deparment"
                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                   >
-                    ปีงบประมาณ 
+                    ปีงบประมาณ <span className="text-red-600">*</span>
                   </label>
 
                   <input
@@ -915,11 +1326,11 @@ export default function addProject({ params }) {
                   {/* <Select
                     id="idYear"
                     value={optionsYear.find(
-                      (option) => option.value === dataAddNewProject.year
+                      (option) => option.value === dataProject.year
                     )}
                     onChange={(e) => {
-                      setdataAddNewProject({
-                        ...dataAddNewProject,
+                      setdataProject({
+                        ...dataProject,
                         deparment: e.value,
                       });
                     }}
@@ -930,7 +1341,7 @@ export default function addProject({ params }) {
                     instanceId="deparment-select" // Add this line to fix duplicate IDs
                   /> */}
                 </div>
-                <div className="col-span-12">
+                <div className="col-span-12 md:col-span-6">
                   <span className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                     ลักษณะกิจกรรม <span className="text-red-600">*</span>
                   </span>
@@ -940,26 +1351,30 @@ export default function addProject({ params }) {
                       return (
                         <div
                           key={item.value}
-                          className="flex items-center col-span-12 md:col-span-3 xl:col-span-2"
+                          className="flex items-center col-span-12 md:col-span-6"
                         >
                           <input
                             id={`checkbox-${item.value}`}
                             type="checkbox"
                             value={item.value}
-                            checked={dataAddNewProject.style_activity_detail.includes(
-                              item.value
-                            )}
+                            checked={dataProject.activity_style_detail
+                              .map(String)
+                              .includes(String(item.value))}
                             className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                             onChange={() =>
-                              setdataAddNewProject((prev) => ({
+                              setdataProject((prev) => ({
                                 ...prev,
-                                style_activity_detail: prev.style_activity_detail.includes(
-                                  item.value
-                                )
-                                  ? prev.style_activity_detail.filter(
-                                      (v) => v !== item.value
-                                    )
-                                  : [...prev.style_activity_detail, item.value],
+                                activity_style_detail:
+                                  prev.activity_style_detail.includes(
+                                    item.value
+                                  )
+                                    ? prev.activity_style_detail.filter(
+                                        (v) => v !== item.value
+                                      )
+                                    : [
+                                        ...prev.activity_style_detail,
+                                        item.value,
+                                      ],
                               }))
                             }
                           />
@@ -976,8 +1391,9 @@ export default function addProject({ params }) {
                 </div>
                 <div className="col-span-12">
                   <span className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    ตอบสนองตามหลักธรรมาภิบาล (สามารถระบุได้มากกว่า 1) <span className="text-red-600">*</span>
-                  </span> 
+                    ตอบสนองตามหลักธรรมาภิบาล (สามารถระบุได้มากกว่า 1){" "}
+                    <span className="text-red-600">*</span>
+                  </span>
 
                   <div className="grid grid-cols-12 gap-2">
                     {optionsprinciples.map((item) => {
@@ -990,12 +1406,12 @@ export default function addProject({ params }) {
                             id={`checkbox-${item.value}`}
                             type="checkbox"
                             value={item.value}
-                            checked={dataAddNewProject.activity_principle.includes(
+                            checked={dataProject.activity_principle.includes(
                               item.value
                             )}
                             className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                             onChange={() =>
-                              setdataAddNewProject((prev) => ({
+                              setdataProject((prev) => ({
                                 ...prev,
                                 activity_principle:
                                   prev.activity_principle.includes(item.value)
@@ -1017,15 +1433,12 @@ export default function addProject({ params }) {
                     })}
                   </div>
                 </div>
-                <div className="col-span-12 mt-4">
-                  <hr className="text-gray-200" />
-                </div>
-                <div className="col-span-12">
-                  <h2>ความสอดคล้องกับประเด็นยุทธศาสตร์ </h2>
+                <div className="col-span-12 mb-0">
+                  <span>ความสอดคล้องกับประเด็นยุทธศาสตร์ </span>
                 </div>
                 <div className="col-span-12 md:col-span-6">
                   <span className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    ประเด็นยุทธศาสตร์
+                    ประเด็นยุทธศาสตร์ <span className="text-red-600">*</span>
                   </span>
 
                   <input
@@ -1037,28 +1450,12 @@ export default function addProject({ params }) {
                     value={`${id_strategic} : ${strategic.name}`}
                     readOnly
                   />
-                  {/* <Select
-                    id="strategic"
-                    value={optionsStrategic.find(
-                      (option) => option.value === dataAddNewProject.strategic
-                    )}
-                    onChange={(e) => {
-                      setdataAddNewProject({
-                        ...dataAddNewProject,
-                        strategic: e.value,
-                      });
-                    }}
-                    options={optionsStrategic}
-                    styles={customStyles}
-                    className="text-sm shadow-md"
-                    placeholder="กรุณาเลือกปีงบประมาณ"
-                    instanceId="strategic-select" // Add this line to fix duplicate IDs
-                  /> */}
                 </div>
                 <div className="col-span-12 md:col-span-6">
                   <span className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    กลยุทธ์
+                    กลยุทธ์ <span className="text-red-600">*</span>
                   </span>
+
                   <input
                     id="year"
                     name="year"
@@ -1071,8 +1468,9 @@ export default function addProject({ params }) {
                 </div>
                 <div className="col-span-12 md:col-span-6">
                   <span className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    โครงการ
+                    กิจกรรม <span className="text-red-600">*</span>
                   </span>
+
                   <input
                     id="year"
                     name="year"
@@ -1083,13 +1481,108 @@ export default function addProject({ params }) {
                     readOnly
                   />
                 </div>
+                <div className="col-span-12 ">
+                  <label
+                    htmlFor="message"
+                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                  >
+                    หลักการและเหตุผล <span className="text-red-600">*</span>
+                  </label>
+                  {/* <CKEditor
+                    editor={ClassicEditor}
+                    data={editorData}
+                    onChange={handleEditorChange}
+                  /> */}
+                  <CustomEditor
+                    value={dataProject.abstract}
+                    onChange={(value) =>
+                      setdataProject({
+                        ...dataProject,
+                        abstract: value, // value คือค่าจาก editor.getData()
+                      })
+                    }
+                  />
+                </div>
                 <div className="col-span-12">
                   <div className="flex flex-col ">
                     <div className="flex flex-row justify-between mb-2">
-                      <h2>OKR  <span className="text-red-600">*</span> </h2>
+                      <h2>
+                        ปัญหาอุปสรรค
+                        และแนวทางการปรับปรุงการดำเนินงานในรอบปีที่ผ่านมา{" "}
+                        <span className="text-red-600">*</span>
+                      </h2>
+                    </div>
+
+                    <div className="relative">
+                      <div className="bg-white rounded-md border border-gray-200 shadow-md mt-3 ">
+                        <CustomEditor
+                          value={dataProject.obstacle}
+                          onChange={(value) =>
+                            setdataProject({
+                              ...dataProject,
+
+                              obstacle: value, // value คือค่าจาก editor.getData()
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-span-12">
+                  <div className="flex flex-col ">
+                    <div className="flex flex-row justify-between mb-2">
+                      <h2>
+                        ผลที่คาดว่าจะได้รับ{" "}
+                        <span className="text-red-600">*</span>{" "}
+                      </h2>
+                    </div>
+
+                    <div className="relative">
+                      <div className="bg-white rounded-md border border-gray-200 shadow-md mt-3 ">
+                        <CustomEditor
+                          value={dataProject.result}
+                          onChange={(value) =>
+                            setdataProject({
+                              ...dataProject,
+
+                              result: value, // value คือค่าจาก editor.getData()
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col-span-12 mt-4 flex flex-row justify-end">
+                  <button
+                    type="button"
+                    onClick={() => handleEditactivity(dataProject)}
+                    className="bg-green-500 text-white text-sm px-12 py-2 rounded-md hover:bg-blue-600"
+                  >
+                    บันทึก
+                  </button>
+                </div>
+                <div className="col-span-12 mt-4">
+                  <hr className="text-gray-200" />
+                </div>
+
+                <div className="col-span-12">
+                  <div className="flex flex-col ">
+                    <div className="flex flex-row justify-between mb-2">
+                      <h2>
+                        OKR <span className="text-red-600">*</span>{" "}
+                      </h2>
                       <button
                         type="button"
-                        onClick={() => setIsOpenModalOKRAdd(true)}
+                        onClick={() =>
+                          setIsOpenModalOKRAdd({
+                            isOpen: true,
+                            type: 1,
+                            data: null,
+                          })
+                        }
                         className=" top-9 right-2 bg-blue-500 text-white text-sm px-8 py-1.5 rounded-md hover:bg-blue-600"
                       >
                         เพิ่ม
@@ -1101,7 +1594,7 @@ export default function addProject({ params }) {
                       <div className="bg-white rounded-md border border-gray-200 shadow-md mt-3 ">
                         <DataTable
                           columns={columns_okr}
-                          data={dataAddNewProject.okr_detail_activity}
+                          data={dataProject.okr_detail_project}
                           customStyles={customStylesTable}
                           fixedHeaderScrollHeight="100%"
                           noDataComponent={
@@ -1121,35 +1614,22 @@ export default function addProject({ params }) {
                 <div className="col-span-12 mt-4">
                   <hr className="text-gray-200" />
                 </div>
-                <div className="col-span-12 ">
-                  <label
-                    htmlFor="message"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    หลักการและเหตุผล <span className="text-red-600">*</span>
-                  </label>
-                  {/* <CKEditor
-                    editor={ClassicEditor}
-                    data={editorData}
-                    onChange={handleEditorChange}
-                  /> */}
-                  <CustomEditor
-                    value={dataAddNewProject.abstract}
-                    onChange={(value) =>
-                      setdataAddNewProject({
-                        ...dataAddNewProject,
-                        abstract: value, // value คือค่าจาก editor.getData()
-                      })
-                    }
-                  />
-                </div>
+
                 <div className="col-span-12">
                   <div className="flex flex-col ">
                     <div className="flex flex-row justify-between mb-2">
-                      <h2>วัตถุประสงค์ <span className="text-red-600">*</span> </h2>
+                      <h2>
+                        วัตถุประสงค์ <span className="text-red-600">*</span>{" "}
+                      </h2>
                       <button
                         type="button"
-                        onClick={() => setIsOpenModalObjectiveAdd(true)}
+                        onClick={() =>
+                          setIsOpenModalObjectiveAdd({
+                            isOpen: true,
+                            type: 1,
+                            data: null,
+                          })
+                        }
                         className=" top-9 right-2 bg-blue-500 text-white text-sm px-8 py-1.5 rounded-md hover:bg-blue-600"
                       >
                         เพิ่ม
@@ -1160,7 +1640,7 @@ export default function addProject({ params }) {
                       <div className="bg-white rounded-md border border-gray-200 shadow-md mt-3 ">
                         <DataTable
                           columns={columns_objective}
-                          data={dataAddNewProject.objective_activity}
+                          data={dataProject.objective}
                           customStyles={customStylesTable}
                           fixedHeaderScrollHeight="100%"
                           noDataComponent={
@@ -1180,10 +1660,19 @@ export default function addProject({ params }) {
                 <div className="col-span-12">
                   <div className="flex flex-col ">
                     <div className="flex flex-row justify-between mb-2">
-                      <h2>ตัวชี้วัดและค่าเป้าหมายของกิจกรรม/กิจกรรม <span className="text-red-600">*</span> </h2>
+                      <h2>
+                        ตัวชี้วัดและค่าเป้าหมายของกิจกรรม/กิจกรรม{" "}
+                        <span className="text-red-600">*</span>{" "}
+                      </h2>
                       <button
                         type="button"
-                        onClick={() => setIsOpenModalindicatorAdd(true)}
+                        onClick={() =>
+                          setIsOpenModalindicatorAdd({
+                            isOpen: true,
+                            type: 1,
+                            data: null,
+                          })
+                        }
                         className=" top-9 right-2 bg-blue-500 text-white text-sm px-8 py-1.5 rounded-md hover:bg-blue-600"
                       >
                         เพิ่ม
@@ -1194,7 +1683,7 @@ export default function addProject({ params }) {
                       <div className="bg-white rounded-md border border-gray-200 shadow-md mt-3 ">
                         <DataTable
                           columns={columns}
-                          data={dataAddNewProject.indicator_activity}
+                          data={dataProject.indicator}
                           customStyles={customStylesTable}
                           fixedHeaderScrollHeight="100%"
                           noDataComponent={
@@ -1214,67 +1703,19 @@ export default function addProject({ params }) {
                 <div className="col-span-12">
                   <div className="flex flex-col ">
                     <div className="flex flex-row justify-between mb-2">
-                      <h2>ผลที่คาดว่าจะได้รับ <span className="text-red-600">*</span> </h2>
-                    </div>
-
-                    <div className="relative">
-                      <div className="bg-white rounded-md border border-gray-200 shadow-md mt-3 ">
-                        <CustomEditor
-                          value={dataAddNewProject.result}
-                          onChange={(value) =>
-                            setdataAddNewProject({
-                              ...dataAddNewProject,
-
-                              result: value, // value คือค่าจาก editor.getData()
-                            })
-                          }
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-span-12 mt-4">
-                  <hr className="text-gray-200" />
-                </div>
-                <div className="col-span-12">
-                  <div className="flex flex-col ">
-                    <div className="flex flex-row justify-between mb-2">
                       <h2>
-                        ปัญหาอุปสรรค
-                        และแนวทางการปรับปรุงการดำเนินงานในรอบปีที่ผ่านมา{" "} <span className="text-red-600">*</span>
+                        ผู้รับผิดชอบระดับปฏิบัติ{" "}
+                        <span className="text-red-600">*</span>{" "}
                       </h2>
-                    </div>
-
-                    <div className="relative">
-                      <div className="bg-white rounded-md border border-gray-200 shadow-md mt-3 ">
-                        <CustomEditor
-                          value={dataAddNewProject.obstacle}
-                          onChange={(value) =>
-                            setdataAddNewProject({
-                              ...dataAddNewProject,
-
-                              obstacle: value, // value คือค่าจาก editor.getData()
-                            })
-                          }
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-span-12 mt-4">
-                  <hr className="text-gray-200" />
-                </div>
-                <div className="col-span-12">
-                  <div className="flex flex-col ">
-                    <div className="flex flex-row justify-between mb-2">
-                      <h2>ผู้รับผิดชอบระดับปฏิบัติ <span className="text-red-600">*</span></h2>
                       <button
                         type="button"
-                        onClick={() => {
-                          setIsOpenModalUserAdd(true);
-                          setTypeuser(1);
-                        }}
+                        onClick={() =>
+                          setIsOpenModalEmployeeAdd({
+                            isOpen: true,
+                            type: 1,
+                            data: null,
+                          })
+                        }
                         className=" top-9 right-2 bg-blue-500 text-white text-sm px-8 py-1.5 rounded-md hover:bg-blue-600"
                       >
                         เพิ่ม
@@ -1285,7 +1726,7 @@ export default function addProject({ params }) {
                       <div className="bg-white rounded-md border border-gray-200 shadow-md mt-3 ">
                         <DataTable
                           columns={columns_useremployee}
-                          data={dataAddNewProject.employee}
+                          data={dataProject.employee}
                           customStyles={customStylesTable}
                           fixedHeaderScrollHeight="100%"
                           noDataComponent={
@@ -1305,13 +1746,19 @@ export default function addProject({ params }) {
                 <div className="col-span-12">
                   <div className="flex flex-col ">
                     <div className="flex flex-row justify-between mb-2">
-                      <h2>ผู้รับผิดชอบระดับนโยบาย / บริหาร <span className="text-red-600">*</span> </h2>
+                      <h2>
+                        ผู้รับผิดชอบระดับนโยบาย / บริหาร{" "}
+                        <span className="text-red-600">*</span>{" "}
+                      </h2>
                       <button
                         type="button"
-                        onClick={() => {
-                          setIsOpenModalUserAdd(true);
-                          setTypeuser(2);
-                        }}
+                        onClick={() =>
+                          setIsOpenModalTeacherAdd({
+                            isOpen: true,
+                            type: 1,
+                            data: null,
+                          })
+                        }
                         className=" top-9 right-2 bg-blue-500 text-white text-sm px-8 py-1.5 rounded-md hover:bg-blue-600"
                       >
                         เพิ่ม
@@ -1322,7 +1769,7 @@ export default function addProject({ params }) {
                       <div className="bg-white rounded-md border border-gray-200 shadow-md mt-3 ">
                         <DataTable
                           columns={columns_userteacher}
-                          data={dataAddNewProject.teacher}
+                          data={dataProject.teacher}
                           customStyles={customStylesTable}
                           fixedHeaderScrollHeight="100%"
                           noDataComponent={
@@ -1335,31 +1782,108 @@ export default function addProject({ params }) {
                     </div>
                   </div>
                 </div>
-
-                <div className="col-span-12 mt-4 flex flex-row justify-end">
-                  <button
-                    type="button"
-                    onClick={() => handleAddproject(dataAddNewProject)}
-                    className="bg-green-500 text-white text-sm px-12 py-2 rounded-md hover:bg-blue-600"
-                  >
-                    บันทึก
-                  </button>
-                </div>
               </div>
             </div>
           </div>
         </div>
       )}
-      {strategic && isOpenModalOKRAdd && (
+      {isOpenModalOKRAdd.isOpen && dataProject.activity_id && (
         <ModalAddOkrNew
-          onClose={() => setIsOpenModalOKRAdd(false)}
-          isOpen={ModalAddOkrNew}
-          type={1}
-          oleOkr={dataAddNewProject.okr_detail_activity}
+          onClose={() => setIsOpenModalOKRAdd({ isOpen: false, type: null })}
+          isOpen={isOpenModalOKRAdd.isOpen}
+          type={isOpenModalOKRAdd.type}
+          old={isOpenModalOKRAdd.data}
+          id_activity={dataProject.activity_id}
+          data={dataProject.okr_detail_project}
           onSelectOkr={(selectedOkrValue) => {
-            console.log(selectedOkrValue),
-              setdataAddNewProject((prev) => {
-                const exists = (prev.okr_detail_activity || []).some(
+            if (isOpenModalOKRAdd.type === 1) {
+              setdataProject((prev) => ({
+                ...prev,
+                okr_detail_project: [
+                  ...(prev.okr_detail_project || []),
+                  {
+                    okr_detail_activity_id: selectedOkrValue.id,
+                    id: selectedOkrValue.value,
+                    name: selectedOkrValue.label,
+                  },
+                ],
+              }));
+            } else {
+              // console.log(selectedOkrValue);
+              // console.log(dataProject);
+              setdataProject((prev) => ({
+                ...prev,
+                okr_detail_project: prev.okr_detail_project.map((item) =>
+                  item.okr_detail_activity_id === selectedOkrValue.id
+                    ? {
+                        ...item,
+                        id: selectedOkrValue.value,
+                        name: selectedOkrValue.label,
+                      }
+                    : item
+                ),
+              }));
+            }
+          }}
+          okr={optionsOkr}
+        />
+      )}
+
+      {isOpenModalObjectiveAdd.isOpen && dataProject.activity_id && (
+        <ModalAddObjectiveNew
+          onClose={() =>
+            setIsOpenModalObjectiveAdd({ isOpen: false, type: null })
+          }
+          isOpen={isOpenModalObjectiveAdd.isOpen}
+          type={isOpenModalObjectiveAdd.type}
+          old={isOpenModalObjectiveAdd.data}
+          id_activity={dataProject.activity_id}
+          objective={dataProject.objective}
+          onSelectOkr={(selectedOkrValue) => {
+            console.log(selectedOkrValue);
+            if (isOpenModalObjectiveAdd.type === 1) {
+              setdataProject((prev) => ({
+                ...prev,
+                objective: [
+                  ...(prev.objective || []),
+                  {
+                    id: selectedOkrValue.id,
+                    name: selectedOkrValue.name,
+                  },
+                ],
+              }));
+            } else {
+              setdataProject((prev) => ({
+                ...prev,
+                objective: prev.objective.map(
+                  (item) =>
+                    item.id === selectedOkrValue.id
+                      ? { ...item, name: selectedOkrValue.name } // อัปเดตชื่อ
+                      : item // คงเดิมถ้าไม่ใช่
+                ),
+              }));
+            }
+          }}
+          okr={optionsOkr}
+        />
+      )}
+
+      {isOpenModalEmployeeAdd.isOpen && (
+        <ModalAddUserNew
+          onClose={() =>
+            setIsOpenModalEmployeeAdd({ isOpen: false, type: null })
+          }
+          isOpen={isOpenModalEmployeeAdd.isOpen}
+          type={isOpenModalEmployeeAdd.type}
+          data={dataProject.employee}
+          id_activity={dataProject.activity_id}
+          id_year={dataProject.id_year}
+          olduser={isOpenModalEmployeeAdd.data}
+          onSelectuser={(selectedOkrValue) => {
+            // console.log(selectedOkrValue),
+            if (isOpenModalEmployeeAdd.type === 1) {
+              setdataProject((prev) => {
+                const exists = (prev.employee || []).some(
                   (item) => item.id === selectedOkrValue.value
                 );
 
@@ -1367,153 +1891,151 @@ export default function addProject({ params }) {
 
                 return {
                   ...prev,
-                  okr_detail_activity: [
-                    ...(prev.okr_detail_activity || []),
+                  employee: [
+                    ...(prev.employee || []),
                     {
                       id: selectedOkrValue.value,
                       name: selectedOkrValue.label,
+                      position: selectedOkrValue.position,
                     },
                   ],
                 };
               });
-          }}
-          okr={optionsOkr}
-        />
-      )}
-
-      {isOpenModalObjectiveAdd && (
-        <ModalAddObjectiveNew
-          onClose={() => setIsOpenModalObjectiveAdd(false)}
-          isOpen={ModalAddOkrNew}
-          type={1}
-          oleOkr={dataAddNewProject.objective_activity}
-          onSelectOkr={(selectedOkrValue) => {
-            console.log(selectedOkrValue),
-              setdataAddNewProject((prev) => {
-                const exists = (prev.objective_activity || []).some(
-                  (item) => item.name === selectedOkrValue // ตรวจจากชื่อ ไม่ใช้ value แล้ว
-                );
-
-                if (exists) return prev;
-
-                const newId = (prev.objective_activity?.length || 0) + 1;
-
-                return {
-                  ...prev,
-                  objective_activity: [
-                    ...(prev.objective_activity || []),
-                    {
-                      id: newId, // ✅ index + 1
-                      name: selectedOkrValue, // ✅ ถ้า selectedOkrValue เป็น string
-                    },
-                  ],
-                };
-              });
-          }}
-          okr={optionsOkr}
-        />
-      )}
-
-      {isOpenModalUserAdd && typeUser == 1 && (
-        <ModalAddUserNew
-          onClose={() => setIsOpenModalUserAdd(false)}
-          isOpen={ModalAddUserNew}
-          type={typeUser}
-          olduser={dataAddNewProject.employee}
-          onSelectuser={(selectedOkrValue) => {
-            // console.log(selectedOkrValue),
-            setdataAddNewProject((prev) => {
-              const exists = (prev.employee || []).some(
-                (item) => item.id === selectedOkrValue.value
-              );
-
-              if (exists) return prev;
-
-              return {
+            } else {
+              // console.log(dataProject);
+              // console.log(selectedOkrValue);
+              setdataProject((prev) => ({
                 ...prev,
-                employee: [
-                  ...(prev.employee || []),
-                  {
-                    id: selectedOkrValue.value,
-                    name: selectedOkrValue.label,
-                    position: selectedOkrValue.position,
-                  },
-                ],
-              };
-            });
+                employee: prev.employee.map((item) =>
+                  item.id_activity_user === selectedOkrValue.id
+                    ? {
+                        ...item,
+                        id: selectedOkrValue.value,
+                        name: selectedOkrValue.label,
+                        position: selectedOkrValue.position,
+                      }
+                    : item
+                ),
+              }));
+            }
           }}
           user={optionsemployee}
         />
       )}
 
-      {isOpenModalUserAdd && typeUser == 2 && (
-        <ModalAddUserNew
-          onClose={() => setIsOpenModalUserAdd(false)}
-          isOpen={ModalAddUserNew}
-          type={typeUser}
-          olduser={dataAddNewProject.teacher}
+      {isOpenModalTeacherAdd.isOpen && (
+        <ModalAddTeacherNew
+          onClose={() =>
+            setIsOpenModalTeacherAdd({ isOpen: false, type: null })
+          }
+          isOpen={isOpenModalTeacherAdd.isOpen}
+          type={isOpenModalTeacherAdd.type}
+          data={dataProject.teacher}
+          id_activity={dataProject.activity_id}
+          id_year={dataProject.id_year}
+          olduser={isOpenModalTeacherAdd.data}
           onSelectuser={(selectedOkrValue) => {
             // console.log(selectedOkrValue),
-            setdataAddNewProject((prev) => {
-              const exists = (prev.teacher || []).some(
-                (item) => item.id === selectedOkrValue.value
-              );
+            if (isOpenModalTeacherAdd.type === 1) {
+              setdataProject((prev) => {
+                const exists = (prev.teacher || []).some(
+                  (item) => item.id === selectedOkrValue.value
+                );
 
-              if (exists) return prev;
+                if (exists) return prev;
 
-              return {
+                return {
+                  ...prev,
+                  teacher: [
+                    ...(prev.teacher || []),
+                    {
+                      id: selectedOkrValue.value,
+                      name: selectedOkrValue.label,
+                      position: selectedOkrValue.position,
+                    },
+                  ],
+                };
+              });
+            } else {
+              // console.log(selectedOkrValue);
+              // console.log(dataProject);
+              setdataProject((prev) => ({
                 ...prev,
-                teacher: [
-                  ...(prev.teacher || []),
-                  {
-                    id: selectedOkrValue.value,
-                    name: selectedOkrValue.label,
-                    position: selectedOkrValue.position,
-                  },
-                ],
-              };
-            });
+                teacher: prev.teacher.map((item) =>
+                  item.id_activity_user === selectedOkrValue.id
+                    ? {
+                        ...item,
+                        id: selectedOkrValue.value,
+                        name: selectedOkrValue.label,
+                        position: selectedOkrValue.position,
+                      }
+                    : item
+                ),
+              }));
+            }
           }}
           user={optionsteacher}
         />
       )}
-      {isOpenModalindicatorAdd && (
+      {isOpenModalindicatorAdd.isOpen && (
         <ModalAddindicatorNew
-          onClose={() => setIsOpenModalindicatorAdd(false)}
-          isOpen={ModalAddindicatorNew}
-          type={1}
-          unit={optionsUnit}
-          olduser={dataAddNewProject.indicator_activity}
+          onClose={() =>
+            setIsOpenModalindicatorAdd({ isOpen: false, type: null })
+          }
+          isOpen={isOpenModalindicatorAdd.isOpen}
+          type={isOpenModalindicatorAdd.type}
+          data={dataProject.indicator}
+          indicator={isOpenModalindicatorAdd.data}
+          id_activity={dataProject.activity_id}
+          id_year={dataProject.id_year}
+          olduser={isOpenModalindicatorAdd.data}
           onSelectindicator={(selectedOkrValue) => {
-            // console.log(selectedOkrValue),
-            setdataAddNewProject((prev) => {
-              const exists = (prev.indicator_activity || []).some(
-                (item) =>
-                  item.indicator_name === selectedOkrValue.indicator_name
-              );
+            if (isOpenModalindicatorAdd.type === 1) {
+              setdataProject((prev) => {
+                const exists = (prev.indicator || []).some(
+                  (item) => item.id === selectedOkrValue.id
+                );
 
-              // const exists_unit = (prev.indicator || []).some(
-              //   (item) =>
-              //     item.unit_name.value === selectedOkrValue.unit_name.value
-              // );
+                if (exists) return prev;
 
-              if (exists) return prev;
-              const newId = (prev.indicator_activity?.length || 0) + 1;
-              return {
+                return {
+                  ...prev,
+                  indicator: [
+                    ...(prev.indicator || []),
+                    {
+                      id: selectedOkrValue.id,
+                      indicator_name: selectedOkrValue.name,
+                      unit_name: {
+                        value: selectedOkrValue.unit_id,
+                        label: selectedOkrValue.unit_name,
+                      },
+                      goal: selectedOkrValue.goal,
+                    },
+                  ],
+                };
+              });
+            } else {
+              // console.log(selectedOkrValue);
+              // console.log(dataProject);
+              setdataProject((prev) => ({
                 ...prev,
-                indicator_activity: [
-                  ...(prev.indicator_activity || []),
-                  {
-                    id: newId,
-                    indicator_name: selectedOkrValue.indicator_name,
-                    unit_name: selectedOkrValue.unit_name,
-                    goal: selectedOkrValue.goal,
-                  },
-                ],
-              };
-            });
+                indicator: prev.indicator.map((item) =>
+                  item.id === selectedOkrValue.id
+                    ? {
+                        ...item,
+                        indicator_name: selectedOkrValue.name,
+                        unit_name: {
+                          value: selectedOkrValue.unit_id,
+                          label: selectedOkrValue.unit_name,
+                        },
+                        goal: selectedOkrValue.goal,
+                      }
+                    : item
+                ),
+              }));
+            }
           }}
-          user={optionsteacher}
+          unit={optionsUnit}
         />
       )}
     </>

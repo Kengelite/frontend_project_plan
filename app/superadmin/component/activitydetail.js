@@ -204,7 +204,7 @@ export default function DatatableActivityDetail({
     {
       name: " Link ข้อมูล ",
       ignoreRowClick: true,
-      center : "true",
+      center: "true",
       cell: (row) =>
         row.deleted_at == null ? (
           <a
@@ -214,13 +214,9 @@ export default function DatatableActivityDetail({
             rel="noopener noreferrer"
           >
             <HiOutlineDocumentReport className="text-2xl" />
-            
           </a>
         ) : (
-          <div className="text-red-500">
-            {" "}
-             - 
-          </div>
+          <div className="text-red-500"> -</div>
         ),
     },
     {
@@ -482,6 +478,14 @@ export default function DatatableActivityDetail({
         color: "#1f2937", // สีตัวอักษร (เทาเข้ม)
         fontWeight: "bold",
         fontSize: "14px",
+        padding: "1.25em 1em",
+      },
+    },
+    rows: {
+      style: {
+        // height: "2em", // เพิ่มความสูงของแถว
+        padding: "0.75em 0",
+        minHeight: "60px", // กำหนดขนาดขั้นต่ำของแถว
       },
     },
   };

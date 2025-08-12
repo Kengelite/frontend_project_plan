@@ -248,6 +248,14 @@ export default function DatatablePrinciple({ onEdit }) {
         color: "#1f2937", // สีตัวอักษร (เทาเข้ม)
         fontWeight: "bold",
         fontSize: "14px",
+       padding:"1.25em 1em",
+      },
+    },
+    rows: {
+      style: {
+        // height: "2em", // เพิ่มความสูงของแถว
+        padding:"0.75em 0",
+        minHeight: "60px", // กำหนดขนาดขั้นต่ำของแถว
       },
     },
   };

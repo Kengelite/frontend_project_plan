@@ -15,13 +15,18 @@ import {
   User,
 } from "lucide-react";
 import Aos from "aos";
+import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 import DatatableProject from "../../../component/project";
 
 export default function HomeProject({ params }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [Actionplan, setActionplan] = useState({ id: "", name: "", budget: "" });
+  const [Actionplan, setActionplan] = useState({
+    id: "",
+    name: "",
+    budget: "",
+  });
   const [Strategic, setStrategic] = useState({ id: "", name: "", budget: "" });
   const [open, setOpen] = useState(false);
   const { id_strategic, id_actionplan } = use(params);
@@ -78,11 +83,20 @@ export default function HomeProject({ params }) {
   const handleModalSelect = (type) => {
     if (type === "new") {
       toggleModalAdd();
-      router.push(
-        `./${id_actionplan}/addnewproject?total=${
-          totalRows + 1
-        }&maxbudget=${parseFloat(Actionplan.budget - MaxBudget)}`
-      );
+      if (parseFloat(Actionplan.budget - MaxBudget) > 0) {
+        router.push(
+          `./${id_actionplan}/addnewproject?total=${
+            totalRows + 1
+          }&maxbudget=${parseFloat(Actionplan.budget - MaxBudget)}`
+        );
+      } else {
+        Swal.fire({
+          title: "เกิดข้อผิดพลาด",
+          text: "งบประมาณไม่เพียงพอในการเพิ่มโครงการใหม่",
+          icon: "error",
+          confirmButtonText: "ตกลง",
+        });
+      }
     }
   };
 
@@ -201,7 +215,7 @@ export default function HomeProject({ params }) {
                     onClick={toggleModalAdd}
                     className="w-22 justify-end md:w-25 py-1.5 bg-blue-400 text-white rounded-lg hover:bg-blue-700"
                   >
-                    เพิ่มข้อมูล
+                    เพิ่มข้อมูล 
                   </button>
                 </div>
               </div>

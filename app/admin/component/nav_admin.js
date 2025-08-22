@@ -81,7 +81,7 @@ export default function Menu() {
     "/admin/manage/position",
   ];
 
-   const projectresponsiblePaths = [
+  const projectresponsiblePaths = [
     "/admin/project/deparment",
     "/admin/project/type",
     "/admin/project/principle",
@@ -104,7 +104,7 @@ export default function Menu() {
         </Link>
         <div>
           <div
-            className={`flex items-center gap-2 mb-2.5 ${
+            className={`flex items-center justify-between mb-2.5 ${
               activePaths.some((path) => pathname.startsWith(path))
                 ? "text-blue-500 font-semibold"
                 : "text-gray-700"
@@ -117,7 +117,7 @@ export default function Menu() {
             </div>
             <ChevronDown
               size={16}
-              className={`transition-transform duration-500 ms-16 md:ms-8 2xl:ms-12 ${
+              className={`transition-transform duration-500   mx-6  ${
                 open ? "rotate-180" : ""
               }`}
             />
@@ -190,8 +190,10 @@ export default function Menu() {
 
         <div>
           <div
-            className={`flex items-center gap-2 mb-2.5 ${
-              activePaths.some((path) => pathname.startsWith("/admin/projectresponsible"))
+            className={`flex items-center justify-between mb-2.5 ${
+              activePaths.some((path) =>
+                pathname.startsWith("/admin/projectresponsible")
+              )
                 ? "text-blue-500 font-semibold"
                 : "text-gray-700"
             }`}
@@ -203,7 +205,7 @@ export default function Menu() {
             </div>
             <ChevronDown
               size={16}
-              className={`transition-transform duration-500 ms-16 md:ms-8 xl:ms-12 ${
+              className={`transition-transform duration-500   mx-6  ${
                 openresponsible ? "rotate-180" : ""
               }`}
             />

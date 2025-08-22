@@ -1518,6 +1518,36 @@ export async function GetDataokrall(token, page = 1, per_page = 10, id_year) {
   }
 }
 
+export async function GetDataokr(token, id) {
+  // console.log(id_project);
+  // let id_year = 1;
+  try {
+    console.log("token : ", token);
+    const response = await axios.get(`${api}/api/v1/superadmin/okrall/${id}`, {
+      // params: {
+      //   page,
+      //   per_page,
+      //   id_year, // ✅ ส่ง query string ได้แบบ: ?page=1&per_page=10&id_year=...
+      // },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    });
+
+    // const json = await response.json();
+    // console.log("data : ", response.data?.data);
+    return response.data?.data ?? [];
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    // Swal.fire("Error", "ไม่สามารถดึงข้อมูลได้", "error");
+    const message =
+      error.response?.data?.message || "เกิดข้อผิดพลาดขณะส่งข้อมูล";
+
+    throw message; // ส่ง Error ออกไปให้จัดการในที่เรียกใช้
+  }
+}
 export async function GetDataprincipleall(token, page = 1, per_page = 10) {
   // console.log(id_project);
   try {

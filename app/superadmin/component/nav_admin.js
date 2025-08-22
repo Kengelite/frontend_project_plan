@@ -22,7 +22,7 @@ import {
   FaUserCircle,
   FaChartLine,
   FaRegCalendarAlt,
-  FaClipboardCheck
+  FaClipboardCheck,
 } from "react-icons/fa";
 
 import Link from "next/link";
@@ -105,7 +105,7 @@ export default function Menu() {
         </Link>
         <div>
           <div
-            className={`flex items-center gap-2 mb-2.5 ${
+            className={`flex items-center justify-between mb-2.5 cursor-pointer ${
               activePaths.some((path) =>
                 new RegExp(`^${path}(\\/|$)`).test(pathname)
               )
@@ -114,13 +114,13 @@ export default function Menu() {
             }`}
             onClick={() => setOpen(!open)}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 ">
               <FaBookOpen size={20} />
               <span className="text-md">แผนยุทธศาสตร์</span>
             </div>
             <ChevronDown
               size={16}
-              className={`transition-transform duration-500 ms-16 md:ms-8 2xl:ms-12 ${
+              className={`transition-transform duration-500  mx-6  ${
                 open ? "rotate-180" : ""
               }`}
             />
@@ -137,7 +137,7 @@ export default function Menu() {
               </Link> */}
               <Link
                 href="/superadmin/strategic"
-                className={`flex items-center gap-2   mb-2.5 
+                className={`flex items-center gap-2    mb-2.5 
                   ${
                     pathname.startsWith("/superadmin/strategic")
                       ? "text-blue-500 font-semibold"
@@ -193,7 +193,7 @@ export default function Menu() {
 
         <div>
           <div
-            className={`flex items-center gap-2 mb-2.5 ${
+            className={`flex items-center justify-between mb-2.5  ${
               activePaths.some((path) =>
                 pathname.startsWith("/superadmin/projectresponsible")
               )
@@ -202,13 +202,13 @@ export default function Menu() {
             }`}
             onClick={() => setOpenresponsible(!openresponsible)}
           >
-            <div className="flex items-center  gap-2">
+            <div className="flex items-center gap-2">
               <BookOpen size={20} />
               <span>งานที่รับผิดชอบ</span>
             </div>
             <ChevronDown
               size={16}
-              className={`transition-transform duration-500 ms-16 md:ms-8 xl:ms-12 ${
+              className={`transition-transform duration-500   mx-6  ${
                 openresponsible ? "rotate-180" : ""
               }`}
             />
@@ -259,7 +259,7 @@ export default function Menu() {
         {role && role === "2" && (
           <div>
             <div
-              className={`flex items-center gap-2 mb-2.5 ${
+              className={`flex items-center justify-between  mb-2.5 ${
                 activemanagePaths.some((path) => pathname.startsWith(path))
                   ? "text-blue-500 font-semibold"
                   : "text-gray-700"
@@ -272,7 +272,7 @@ export default function Menu() {
               </div>
               <ChevronDown
                 size={16}
-                className={`transition-transform duration-500 ms-16 md:ms-15 2xl:ms-17 ${
+                className={`transition-transform duration-500  mx-6   ${
                   opendata ? "rotate-180" : ""
                 }`}
               />
@@ -367,7 +367,7 @@ export default function Menu() {
             }`}
           >
             <FaClipboardCheck size={20} />
-            <span className="text-md">อนุมัติโอนงบกิจกรรม</span>
+            <span className="text-md">โอนงบกิจกรรม</span>
           </Link>
         )}
         {role && role === "2" && (

@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useState, use, useEffect } from "react";
 import Link from "next/link";
-import Menu from "../component/nav_admin";
+import Menu from "../../superadmin/component/nav_admin";
 import Cookies from "js-cookie";
 import Header from "../component/header";
 import { useSearchParams } from "next/navigation";

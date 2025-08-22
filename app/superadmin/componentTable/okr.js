@@ -223,7 +223,7 @@ export default function DatatableOkr({ year_id, year }) {
                 );
 
                 // เปลี่ยนหน้า
-                window.location.href = `/admin/okr/detail`;
+                window.location.href = `/superadmin/okr/detail`;
               }}
             >
               <i className="bi bi-eye text-gray-500 text-xl group-hover:text-blue-500"></i>
@@ -253,7 +253,7 @@ export default function DatatableOkr({ year_id, year }) {
                 );
 
                 // เปลี่ยนหน้า
-                window.location.href = `/admin/okr/edit`;
+                window.location.href = `/superadmin/okr/edit`;
               }}
             >
               <FiEdit2 className="text-xl text-gray-500 group-hover:text-black" />

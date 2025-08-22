@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Menu from "../../component/nav_admin";
+import Menu from "../../../superadmin/component/nav_admin";
 import Header from "../../component/header";
 import Select from "react-select";
 import DataTable from "react-data-table-component";
@@ -13,7 +13,7 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import Loading from "./loading";
 import Cookies from "js-cookie";
-import { GetDataunitUse } from "../../../fetch_api/fetch_api_admin";
+import { GetDataunitUse } from "../../../fetch_api/fetch_api_superadmin";
 export default function addProject() {
   const [dataAddNewokr, setdataAddNewokr] = useState({
     id: null,

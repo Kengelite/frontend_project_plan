@@ -61,7 +61,7 @@ export default function Menu() {
         </Link>
         <div>
           <div
-            className={`flex items-center gap-2 mb-2.5 ${
+            className={`flex items-center justify-between mb-2.5 ${
               activePaths.some((path) => pathname.startsWith(path))
                 ? "text-blue-500 font-semibold"
                 : "text-gray-700"
@@ -74,7 +74,7 @@ export default function Menu() {
             </div>
             <ChevronDown
               size={16}
-              className={`transition-transform duration-500 ms-16 md:ms-4 xl:ms-12 ${
+              className={`transition-transform duration-500   mx-6  ${
                 open ? "rotate-180" : ""
               }`}
             />
@@ -114,6 +114,21 @@ export default function Menu() {
               >
                 <Settings size={16} />
                 <span>กิจกรรม</span>
+              </Link>
+              <Link
+                href="/superadmin/projectresponsible/activity"
+                className={`flex items-center gap-2   mb-2.5 
+                  ${
+                    pathname.startsWith(
+                      "/superadmin/projectresponsible/activity"
+                    )
+                      ? "text-blue-500 font-semibold"
+                      : "text-gray-700"
+                  }
+                  `}
+              >
+                <Settings size={16} />
+                <span className="text-sm">OKR</span>
               </Link>
             </div>
           )}
